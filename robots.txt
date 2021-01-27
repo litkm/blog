@@ -1,1 +1,1 @@
-Sitemap: https://litkm.github.io/blog/sitemap.xml
+Sitemap: http://litkm.com/sitemap.xml
