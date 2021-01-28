@@ -7,7 +7,7 @@
 # https://learnxinyminutes.com/docs/yaml/
 
 title: The LitKM Blog
-description: Blogging about learning to apply machine learning to litigation and legals ops.
+description: Learning to apply machine learning to litigation and legals ops.
 github_username: litkm
 # you can comment the below line out if your repo name is not different than your baseurl
 github_repo: "blog"
