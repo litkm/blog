@@ -7,7 +7,7 @@
 # https://learnxinyminutes.com/docs/yaml/
 
 title: The LitKM Blog
-description: Learning to apply machine learning to litigation and practice management.
+description: Learning to apply machine learning to litigation.
 github_username: litkm
 # you can comment the below line out if your repo name is not different than your baseurl
 github_repo: "blog"
@@ -58,7 +58,7 @@ annotations: false
 show_tags: true
 
 # Add your Google Analytics ID here if you have one and want to use it
-google_analytics: 
+google_analytics: litkm
 
 exclude:
   - docker-compose.yml
