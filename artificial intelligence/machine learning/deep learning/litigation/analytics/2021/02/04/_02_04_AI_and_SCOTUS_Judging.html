@@ -136,7 +136,7 @@ window.onload = wrap_img;
 <li class="toc-entry toc-h1"><a href="#The-Dataset">The Dataset </a></li>
 <li class="toc-entry toc-h1"><a href="#The-Deep-Learning-Model">The Deep Learning Model </a></li>
 <li class="toc-entry toc-h1"><a href="#The-Results">The Results </a></li>
-<li class="toc-entry toc-h1"><a href="#A-Twist">A Twist </a></li>
+<li class="toc-entry toc-h1"><a href="#The-Real-World">The Real World </a></li>
 <li class="toc-entry toc-h1"><a href="#Concluding-Thoughts">Concluding Thoughts </a></li>
 </ul><!--
 #################################################
@@ -207,8 +207,8 @@ window.onload = wrap_img;
 <p>So how did the model do?</p>
 <p>Not too badly. It learned to predict accurately whether Justice Brennan voted with the majority or the minority of the SCOTUS panel with slightly less than 80% accuracy.</p>
 <p>If you are interested in the code and the output it produces, <a href="https://github.com/litkm/WJBrennan-Voting/blob/main/WJBrennan_Voting.ipynb">click here</a>.</p>
-<h1 id="A-Twist">
-<a class="anchor" href="#A-Twist" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Twist<a class="anchor-link" href="#A-Twist"> </a>
+<h1 id="The-Real-World">
+<a class="anchor" href="#The-Real-World" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Real World<a class="anchor-link" href="#The-Real-World"> </a>
 </h1>
 <p>Of course, in the "real world" we do not have the benefit of a judge's entire voting record. Rather, we would have a record of previous votes, from which we would want to predict future votes.</p>
 <p>This is the approach taken in Prof. Alschner's lesson. The dataset is not randomly split. Rather, the machine learning algorithm is trained on the voting record from 1956 until 1979, and then tested against the record from the 1980s. That is, the pre-1980 voting record is used to predict the votes from the 1980s.</p>
