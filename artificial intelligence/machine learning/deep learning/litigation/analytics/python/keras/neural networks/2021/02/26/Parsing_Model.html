@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Parsing a Neural Network for Predicting SCOTUS Judging | The LitKM Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Parsing a Neural Network for Predicting SCOTUS Judging" />
+<meta name="author" content="Charles Dobson" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A follow-up post" />
+<meta property="og:description" content="A follow-up post" />
+<link rel="canonical" href="http://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/2021/02/26/Parsing_Model.html" />
+<meta property="og:url" content="http://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/2021/02/26/Parsing_Model.html" />
+<meta property="og:site_name" content="The LitKM Blog" />
+<meta property="og:image" content="http://www.litkm.com/images/social_logo.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-02-26T00:00:00-06:00" />
+<script type="application/ld+json">
+{"url":"http://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/2021/02/26/Parsing_Model.html","@type":"BlogPosting","headline":"Parsing a Neural Network for Predicting SCOTUS Judging","dateModified":"2021-02-26T00:00:00-06:00","datePublished":"2021-02-26T00:00:00-06:00","image":"http://www.litkm.com/images/social_logo.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/2021/02/26/Parsing_Model.html"},"author":{"@type":"Person","name":"Charles Dobson"},"description":"A follow-up post","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://www.litkm.com/feed.xml" title="The LitKM Blog" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-188329463-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">The LitKM Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Parsing a Neural Network for Predicting SCOTUS Judging</h1><p class="page-description">A follow-up post</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-02-26T00:00:00-06:00" itemprop="datePublished">
+        Feb 26, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Charles Dobson</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      12 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#artificial intelligence">artificial intelligence</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#machine learning">machine learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#deep learning">deep learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#litigation">litigation</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#analytics">analytics</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#keras">keras</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#neural networks">neural networks</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/litkm/blog/tree/master/_notebooks/2021-02-26-Parsing_Model.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/litkm/blog/master?filepath=_notebooks%2F2021-02-26-Parsing_Model.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/litkm/blog/blob/master/_notebooks/2021-02-26-Parsing_Model.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Introduction">Introduction </a></li>
+<li class="toc-entry toc-h1"><a href="#Workflow">Workflow </a></li>
+<li class="toc-entry toc-h1"><a href="#Modules">Modules </a></li>
+<li class="toc-entry toc-h1"><a href="#Data">Data </a></li>
+<li class="toc-entry toc-h1"><a href="#Training-Set-and-Testing-Set">Training Set and Testing Set </a></li>
+<li class="toc-entry toc-h1"><a href="#Preprocessing-the-Data">Preprocessing the Data </a></li>
+<li class="toc-entry toc-h1"><a href="#Define-the-Neural-Network">Define the Neural Network </a></li>
+<li class="toc-entry toc-h1"><a href="#Running-the-Model">Running the Model </a></li>
+<li class="toc-entry toc-h1"><a href="#Reporting-the-Results">Reporting the Results </a></li>
+<li class="toc-entry toc-h1"><a href="#Final-Thoughts">Final Thoughts </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-02-26-Parsing_Model.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction">
+<a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
+</h1>
+<p>In a recent posted titled <a href="https://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/law/general/2021/02/19/_02_04_AI_and_SCOTUS_Judging.html">Using Artificial Intelligence to Predict SCOTUS Judging</a>, I discussed a machine learning model I used to make predictions regarding Justice Brennan's voting record on the Supreme Court of the United Status (SCOTUS). This model is a neural network, coded in Python, and uses the Keras framework. In the present post, I will review the code, line-by-line, and explain it.</p>
+<p>This post focuses on code and not the dataset. For more information regarding the latter, please see my earlier post. Further, as noted in the <a href="https://www.litkm.com/law/litigation/general/2021/02/19/How_to_Read_this_Blog.html">README</a> for this blog, I am assuming the reader has a basic level of familiarity with object oriented programming and common Python libraries.</p>
+<p>That said, I am aiming to write this in a way so that a general reader will still be able to follow along (more or less). If you are interested in this content but I am assuming too much background knowledge, please let me know. I'd be happy to explain further.</p>
+<p>For reference, I developed the model using Google Colab.</p>
+<h1 id="Workflow">
+<a class="anchor" href="#Workflow" aria-hidden="true"><span class="octicon octicon-link"></span></a>Workflow<a class="anchor-link" href="#Workflow"> </a>
+</h1>
+<p>Before delving into the details, this is the workflow underpinning the code:</p>
+<ol>
+<li>Import modules</li>
+<li>Load data</li>
+<li>Define the training set and testing set</li>
+<li>Preprocess the data</li>
+<li>Define the model</li>
+<li>Run the model</li>
+<li>Report on the results</li>
+</ol>
+<h1 id="Modules">
+<a class="anchor" href="#Modules" aria-hidden="true"><span class="octicon octicon-link"></span></a>Modules<a class="anchor-link" href="#Modules"> </a>
+</h1>
+<p>We begin our script by loading the modules we require. These are our tools to preprocess the data and assemble the model. This model does not involve coding any functions or classes from scratch. We are not building any new tools. Instead, we import everything we need. As a result, this script is remarkably short.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span><span class="p">,</span> <span class="n">LabelEncoder</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">InputLayer</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">classification_report</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.utils</span> <span class="kn">import</span> <span class="n">to_categorical</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In brief, we import libraries or portions thereof from:</p>
+<ul>
+<li>
+<strong>pandas</strong> - for loading the data regarding Justice Brennan's voting record</li>
+<li>
+<strong>Scikit-learn</strong> - for preprocessing the data</li>
+<li>
+<strong>NumPy</strong> - to help with the reporting; and, of course</li>
+<li>
+<strong>Keras</strong> - the framework this model uses. </li>
+</ul>
+<h1 id="Data">
+<a class="anchor" href="#Data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data<a class="anchor-link" href="#Data"> </a>
+</h1>
+<p>At this step, our objective is to load the data into a pandas DataFrame. Once in this format, we can begin preprocessing it for the model to analyze.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">'https://raw.githubusercontent.com/litkm/WJBrennan-Voting/main/WJBrennan_voting.csv'</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We obtain our data from a CSV file. For convenience, I uploaded it to GitHub (in raw format). We then create a variable and assign it to the web address where the file is located.</p>
+<p>Next, we pass this variable into the the pandas <code>read_csv()</code> method to load the CSV file as a DataFrame, and reassign the variable for the CSV file to now be the variable for the DataFrame.</p>
+<h1 id="Training-Set-and-Testing-Set">
+<a class="anchor" href="#Training-Set-and-Testing-Set" aria-hidden="true"><span class="octicon octicon-link"></span></a>Training Set and Testing Set<a class="anchor-link" href="#Training-Set-and-Testing-Set"> </a>
+</h1>
+<p>To train this model, we must split the data into training and test sets. The model "learns" from the training data; during the learning phase, the test data is excluded from review. Once it completes a learning phase, the model switches to a test phase, where it evaluates its predictive capacity (i.e. how well it learned from the training data) using the test data.</p>
+<p>This model uses supervised learning. Often, this is framed in terms of <em>x</em> and <em>y</em> variables:</p>
+<ul>
+<li>
+<em>x</em> represents the data inputted into the model. These inputs are sometimes called <em>features</em>. </li>
+<li>
+<em>y</em> represents an outcome the model is to predict. This is sometimes called the <em>target variable</em> or <em>label</em>.</li>
+</ul>
+<p>During training, the model processes the features and uses them to make predictions. These predictions are compared against the corresponding label. The outcome of this comparison is a "supervisory signal", i.e. whether the prediction was correct or not; and, if not, by how much. The model then uses this "signal" to recalibrate with the objective of improving its predictive capacity.</p>
+<p>With this in mind, we need to identify our <em>x</em> and <em>y</em> variables in the Justice Brennan dataset. The first five rows of the dataset is reproduced below:</p>
+<p><img src="/images/copied_from_nb/my_icons/BrennanDataset.png" alt=""></p>
+<p>Our target variable for this model is the outcome identified in the "vote" column, i.e. whether Justice Brennan voted with the majority or the minority. This is what we want to predict in respect of each row (where each row represents one SCOTUS case).</p>
+<p>The data in the preceding columns comprises the information we intend to input into the model, and which the model will use to predict the target variables.</p>
+<p>During training, the model will review each row of features, case by case, and make a prediction relating to that case. This prediction will then be compared to the label for that case, i.e. whether Brennan voted with the majority or not. This comparison provides the supervisory signal. Based on the result, the model recalibrates and proceeds to the next row in the dataset, i.e. the next case.</p>
+<p>After the model cycles through the training dataset, it then evaluates its predictive capacity against the test dataset.</p>
+<p>To provide for the foregoing, we must split the original dataset into four subsets:</p>
+<ol>
+<li>
+<code>X_train</code> - the set of features for training </li>
+<li>
+<code>Y_train</code> - the corresponding set of labels for training</li>
+<li>
+<code>X_test</code> - the set of features for testing</li>
+<li>
+<code>Y_test</code> - the correspondence set of labels for testing</li>
+</ol>
+<p>We can accomplish this in a few steps.</p>
+<p>First, we split the DataFrame into features and labels:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">'vote'</span><span class="p">]</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[[</span><span class="s1">'term'</span><span class="p">,</span> <span class="s1">'petitioner'</span><span class="p">,</span> <span class="s1">'respondent'</span><span class="p">,</span> <span class="s1">'jurisdiction'</span><span class="p">,</span> <span class="s1">'caseOrigin'</span><span class="p">,</span> <span class="s1">'caseSource'</span><span class="p">,</span> <span class="s1">'certReason'</span><span class="p">,</span> <span class="s1">'issue'</span><span class="p">,</span> <span class="s1">'issueArea'</span><span class="p">]]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We now have a DataFrame assigned to a variable called <em>y</em>, and it contains all of the labels.</p>
+<p>We now also have a DataFrame assigned to a variable called <em>x</em>, and it contains all of the features.</p>
+<p>Next, we further split these two DataFrames into training sets (<code>X_train</code> and <code>Y_train</code>) and test sets (<code>X_test</code> and <code>Y_test</code>). To do this, we use the <code>test_train_split()</code> function from the sci-kit learn library:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">Y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As you can see, <code>test_train_split</code> takes several parameters:</p>
+<ul>
+<li>
+<code>x</code> - representing DataFrame of features to be split</li>
+<li>
+<code>y</code> - representing the DataFame of labels to be split</li>
+<li>
+<code>test_size</code> - this parameter specifies the size of the test set; in this instance, we allocate 30% of the dataset for testing</li>
+<li>
+<code>random_state</code> - this parameter controls the shuffling (randomization) applied to the data before applying the split</li>
+</ul>
+<p>When calling this function, we assign the data subsets to the variables <code>X_train</code>, <code>Y_train</code>, <code>X_test</code>, and <code>Y_test</code>. Now we are ready to proceed to the next stage.</p>
+<h1 id="Preprocessing-the-Data">
+<a class="anchor" href="#Preprocessing-the-Data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Preprocessing the Data<a class="anchor-link" href="#Preprocessing-the-Data"> </a>
+</h1>
+<p>Before the data can be fed into the model, it must be preprocessed for optimal results. In this instance, we need to:</p>
+<ol>
+<li>Scale the features</li>
+<li>Convert the labels from categories to integers</li>
+</ol>
+<p>As you can see from the printout of the dataset above, all of the features are represented using numbers. Based on the first five rows alone, we note dissimilarity; for example:</p>
+<ul>
+<li>
+<strong>respondent</strong> - ranges from 3 to 369</li>
+<li>
+<strong>jurisdiction</strong> - ranges from 1 to 2</li>
+<li>
+<strong>issue</strong> - ranges from 40,070 to 120,020</li>
+</ul>
+<p>If we were to dive into the rest of the dataset, we would see this dissimilarity is representative. Each of the columns has a different range, mean, etc.</p>
+<p>When we scale the features, the model recalculates the numbers that comprise the features so that there is zero mean variance between them.</p>
+<p>To accomplish this, we use another tool from the sci-kit learn library, namely the <code>ColumnTransformer()</code> class.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">columns_for_standard</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'term'</span><span class="p">,</span> <span class="s1">'petitioner'</span><span class="p">,</span> <span class="s1">'respondent'</span><span class="p">,</span> <span class="s1">'jurisdiction'</span><span class="p">,</span> <span class="s1">'caseOrigin'</span><span class="p">,</span> <span class="s1">'caseSource'</span><span class="p">,</span> <span class="s1">'certReason'</span><span class="p">,</span> <span class="s1">'issue'</span><span class="p">,</span> <span class="s1">'issueArea'</span><span class="p">]</span>
+
+<span class="n">ct</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([(</span><span class="s1">'numeric'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">columns_for_standard</span><span class="p">)])</span>
+
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span> 
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For convenience, we first assign the features we wish to scale to a variable called <code>columns_for_standard</code>. This variable is used in the next line of code.</p>
+<p>Then, we create a <code>ColumnTransformer()</code> object assigned to the variable <code>ct</code>. When initializing this object, we configure the form of scaling and specify the features to be scaled.</p>
+<p>Next, we use the related class methods, <code>fit_transform()</code> and <code>transform()</code>, to apply the scaler to the features. Each of these methods produces NumPy arrays comprising the now scaled features. These arrays are converted back into DataFrames and assigned, respectively, to our <code>X_train</code> and <code>X_test</code> variables. Done! We've scaled our features.</p>
+<p>Now to convert the labels from categories to integers (whole numbers) and ensure they, too, are scaled. On review of the "vote" column above, you will note there are no numbers. Rather, there is only the word "majority". Throughout the dataset, the "vote" column only ever has the word "majority" or "minority" under it. To make these "categories" digestable for the model, we must convert them into integers and scale them.</p>
+<p>Here again, we use a tool from the sci-kit learn library, namely the <code>LabelEncoder()</code> class along with the pandas class method <code>astype()</code>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">le</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span>
+<span class="n">Y_train</span> <span class="o">=</span> <span class="n">le</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Y_train</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+<span class="n">Y_test</span> <span class="o">=</span> <span class="n">le</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Y_test</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+
+<span class="n">Y_train</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">Y_train</span><span class="p">)</span>
+<span class="n">Y_test</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">Y_test</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We first initialize a <code>LabelEncoder()</code> object and assign it to the variable <code>le</code>.</p>
+<p>Then, for each of <code>Y_train</code> and <code>Y_test</code>, we call the <code>astype()</code> method to convert the categories (i.e. words) into integers, while calling the <code>LabelEncoder()</code> class methods <code>fit_transform()</code> and <code>transform()</code>, as applicable, to scale each of these DataFrames, too.</p>
+<p>We must then use a Keras function called <code>to_categorical()</code> to convert the integers in <code>Y_train</code> and <code>Y_test</code> into a form called one-hot-encodings, which the model requires to factor properly for the "supervisory signals" discussed above.</p>
+<p>At this point, we are finally ready to create the neural network itself.</p>
+<h1 id="Define-the-Neural-Network">
+<a class="anchor" href="#Define-the-Neural-Network" aria-hidden="true"><span class="octicon octicon-link"></span></a>Define the Neural Network<a class="anchor-link" href="#Define-the-Neural-Network"> </a>
+</h1>
+<p>To create the neural network, we use Keras' <code>Sequential()</code> class. This is one of the most popular types of models and provides for adding layers to the neural network, one after the other in a straightforward way.</p>
+<p>We need to sepecify:</p>
+<ol>
+<li>An input layer</li>
+<li>Any hidden layers</li>
+<li>The output layer</li>
+</ol>
+<p>Below is a diagram of a simple neural network:</p>
+<p><img src="/images/copied_from_nb/my_icons/Neural_network_example.png" alt=""></p>
+<p>The model we are building is also very simple and is likewise commprised of only three layers: an input layer, one hidden layer, and then the output layer. The code to create this is below.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">InputLayer</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],)))</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">'relu'</span><span class="p">))</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">'softmax'</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We invoke the <code>Sequential()</code> class and assign it to the variable <code>model</code>. Then, we add the input layer. We configure it (the <code>input_shape</code> parameter) so that there is one input neuron for each type of feature in the <code>X_train</code> DataFrame. The example model in the diagram above has two input neurons (the circles in the input layer). By contrast, this model has nine input neurons because the dataset has nine different types of features.</p>
+<p>Then, we add the hidden layer and the output layer. The integers "10" and "2" indicate the number of neurons in each layer. The <code>activation</code> parameter is a setting that configures some of the math the model performs each time a row (i.e. case) from the dataset is passed through the neural network.</p>
+<p>Now we need to "compile" our model. Among other things, the below line of code further configures the math the model uses across all layers of the neural network when processing the dataset.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s1">'categorical_crossentropy'</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">'adam'</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">'accuracy'</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Running-the-Model">
+<a class="anchor" href="#Running-the-Model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running the Model<a class="anchor-link" href="#Running-the-Model"> </a>
+</h1>
+<p>At this stage, we are finally ready to run our model. To do this, we use Keras' <code>fit()</code> method with the following paramaters:</p>
+<ul>
+<li>
+<code>X_train</code> - the training features</li>
+<li>
+<code>Y_train</code> - the training labels</li>
+<li>
+<code>epochs</code> - the numbers of times the model cycles through the entire dataset</li>
+<li>
+<code>batch_size</code> - the number of rows from the dataset (i.e. cases) the model will feed through the neural network before recalibrating in response to the supervisory signals </li>
+<li>
+<code>verbose</code> - set to <code>1</code> tells the model to print its progress to the screen</li>
+<li>
+<code>validation_data</code> - indicates the test features and test labels to use during the testing phase</li>
+</ul>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Epoch 1/5
+416/416 [==============================] - 1s 2ms/step - loss: 0.4487 - accuracy: 0.7953 - val_loss: 0.4750 - val_accuracy: 0.7795
+Epoch 2/5
+416/416 [==============================] - 1s 1ms/step - loss: 0.4468 - accuracy: 0.7929 - val_loss: 0.4782 - val_accuracy: 0.7767
+Epoch 3/5
+416/416 [==============================] - 1s 1ms/step - loss: 0.4476 - accuracy: 0.7908 - val_loss: 0.4727 - val_accuracy: 0.7767
+Epoch 4/5
+416/416 [==============================] - 1s 1ms/step - loss: 0.4476 - accuracy: 0.7932 - val_loss: 0.4746 - val_accuracy: 0.7704
+Epoch 5/5
+416/416 [==============================] - 1s 1ms/step - loss: 0.4479 - accuracy: 0.7908 - val_loss: 0.4770 - val_accuracy: 0.7760
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;tensorflow.python.keras.callbacks.History at 0x7fabab0d4e50&gt;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The output above suggests the model learns from the data fairly quickly. After one round of training, training accuracy is ~80% and testing accuracy is ~77%. Sometimes when I've run this model, training accuracy after the first round has been around ~62%; testing accuracy has also been lower than this example. However, by the second round the model seems consistently to max out at around ~79%-80% training accuracy and ~77%-78% testing accuracy, per around.</p>
+<p>I've played around a bit with the hyperparameters (i.e. the configuration of the model in terms of layers, number of neurons, number of layers, epochs, etc.), and have yet to improve performance materially. So I've stuck with the simplest implementation of this model for this post.</p>
+<h1 id="Reporting-the-Results">
+<a class="anchor" href="#Reporting-the-Results" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reporting the Results<a class="anchor-link" href="#Reporting-the-Results"> </a>
+</h1>
+<p>To evaluate the performance of the model over all epochs, we can use Keras' <code>evaluate</code> method.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">loss</span><span class="p">,</span> <span class="n">acc</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Loss:"</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">"Accuracy:"</span><span class="p">,</span> <span class="n">acc</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Loss: 0.4769740104675293 Accuracy: 0.7759831547737122
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The above line of code evaluates the model using the testing data (<code>X_test</code>) and the testing labels (<code>Y_test</code>), and outputs (prints) the results. Overall, the model accurately predicted Justice Brennan's vote with ~78% accuracy.</p>
+<p>The other <code>Loss</code> number is a calculation relating to how far off the mark the model's predictions were, overall. This number can also be used to tune the model and further details will have to wait for another post.</p>
+<h1 id="Final-Thoughts">
+<a class="anchor" href="#Final-Thoughts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Final Thoughts<a class="anchor-link" href="#Final-Thoughts"> </a>
+</h1>
+<p>My comments on the foregoing code glosses over a lot of detail, particularly in terms of the calculcations the model performs. I am planning to address this in a future post.</p>
+<p>Candidly, I still don't understand everything that is going on in the code discussed. It seems to work. I just can't say for sure yet.</p>
+<p>Thanks for reading! Did I make a mistake? Does something not make sense? Hit me up.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="litkm/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/2021/02/26/Parsing_Model.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Learning to apply machine learning to litigation.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/litkm" title="litkm"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/LitigationKM" title="LitigationKM"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
