@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>How to Load Text Files as a Corpus for NLTK in Google Colab | The LitKM Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="How to Load Text Files as a Corpus for NLTK in Google Colab" />
+<meta name="author" content="Charles Dobson" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Featuring two approaches: in Colab or from Google Drive" />
+<meta property="og:description" content="Featuring two approaches: in Colab or from Google Drive" />
+<link rel="canonical" href="http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html" />
+<meta property="og:url" content="http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html" />
+<meta property="og:site_name" content="The LitKM Blog" />
+<meta property="og:image" content="http://www.litkm.com/images/social_logo.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-12T00:00:00-06:00" />
+<script type="application/ld+json">
+{"url":"http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html","@type":"BlogPosting","headline":"How to Load Text Files as a Corpus for NLTK in Google Colab","dateModified":"2021-03-12T00:00:00-06:00","datePublished":"2021-03-12T00:00:00-06:00","image":"http://www.litkm.com/images/social_logo.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html"},"author":{"@type":"Person","name":"Charles Dobson"},"description":"Featuring two approaches: in Colab or from Google Drive","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://www.litkm.com/feed.xml" title="The LitKM Blog" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-188329463-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">The LitKM Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How to Load Text Files as a Corpus for NLTK in Google Colab</h1><p class="page-description">Featuring two approaches: in Colab or from Google Drive</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-03-12T00:00:00-06:00" itemprop="datePublished">
+        Mar 12, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Charles Dobson</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      2 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#natural language processing">natural language processing</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#preprocessing text">preprocessing text</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#nltk">nltk</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#nlp">nlp</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#google colab">google colab</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/litkm/blog/tree/master/_notebooks/2021-03-12-Loading_Text_for_NLTK_in_Google_Colab.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/litkm/blog/master?filepath=_notebooks%2F2021-03-12-Loading_Text_for_NLTK_in_Google_Colab.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/litkm/blog/blob/master/_notebooks/2021-03-12-Loading_Text_for_NLTK_in_Google_Colab.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Introduction">Introduction </a></li>
+<li class="toc-entry toc-h1"><a href="#Loading-from-within-Google-Colab">Loading from within Google Colab </a></li>
+<li class="toc-entry toc-h1"><a href="#Loading-from-Google-Drive">Loading from Google Drive </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-03-12-Loading_Text_for_NLTK_in_Google_Colab.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction">
+<a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
+</h1>
+<p>Most tutorials on NLTK presume you are working locally on your own machine as opposed to in a cloud environment such as Google Colab.</p>
+<p>In this blog post, I address using Google Colab to load text files for use as a corpus from:</p>
+<ol>
+<li>within Google Colab; and</li>
+<li>Google Drive.</li>
+</ol>
+<p>When I looked on the web, I did not see any articles addressing this directly. Hence this brief post.</p>
+<h1 id="Loading-from-within-Google-Colab">
+<a class="anchor" href="#Loading-from-within-Google-Colab" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading from within Google Colab<a class="anchor-link" href="#Loading-from-within-Google-Colab"> </a>
+</h1>
+<p>First, you must upload the text files into your Colab environment.</p>
+<p>Click on the file icon located on the left side of the screen. Navigate the file structure to where you wish to store the files.</p>
+<p>By default, your Colab environment will have a <code>/content</code> subfolder. For this post, I have created a subfolder called <code>textfiles</code>. This is where I then uploaded the text files for the corpus. To upload, right click on the folder where you wish the files to be placed.</p>
+<p>In the below screen shot, you will see the file structure and the "test" text files I uploaded:</p>
+<p><img src="/images/copied_from_nb/my_icons/colabfiles.png" alt=""></p>
+<p>Now we are ready to load the text files as a corpus. From hereon, the process is essentially the same as if you were working locally.</p>
+<p>For the limited purposes of this tutorial, the below dependencies are required.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="kn">import</span> <span class="n">PlaintextCorpusReader</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>NLTK contains a class called <code>PlaintextCorpusReader()</code> for creating a corpus from text files.</p>
+<p>In the below example, we assign the directory where the files are located to a variable (<code>corpus_root</code>).</p>
+<p>We then instantiate an instance of <code>PlaintextCorpusReader()</code> and assign it to the variable <code>corpus</code>. The parameters indicate where to find the text files, and which files to include (in this example, all of them).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus_root</span> <span class="o">=</span> <span class="s1">'/content/textfiles'</span>
+<span class="n">corpus</span> <span class="o">=</span> <span class="n">PlaintextCorpusReader</span><span class="p">(</span><span class="n">corpus_root</span><span class="p">,</span> <span class="s1">'.*'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To confirm the corpus has been constituted, we can call the <code>fileids()</code> method to list the files contained within the corpus.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus</span><span class="o">.</span><span class="n">fileids</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>['test_data_1.txt', 'test_data_2.txt', 'test_data_3.txt']</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If you are using a free Colab account, each time your disconnect from the runtime environment your text files will be deleted. To avoid this, either upgrade your Colab account or use Google drive.</p>
+<h1 id="Loading-from-Google-Drive">
+<a class="anchor" href="#Loading-from-Google-Drive" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading from Google Drive<a class="anchor-link" href="#Loading-from-Google-Drive"> </a>
+</h1>
+<p>The process for creating a corpus from textfiles located on your Google drive is similar to the above.</p>
+<p>First, upload the text files into your Google drive. Take note of the directory.</p>
+<p>In addition to the dependencies listed above, one more is required. This is to mount your Google drive in your Colab environment. Call the the mount method per the below and follow the instructions that result.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">drive</span>
+<span class="n">drive</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">'/content/drive'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Mounted at /content/drive
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now your Google drive is mounted. The balance of the process is the same as above, i.e. as if you were working with the files directly in your Colab environment. Make sure to revise the file path as necessary.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus_root</span> <span class="o">=</span> <span class="s1">'/content/drive/MyDrive/Datasets'</span>
+<span class="n">corpus</span> <span class="o">=</span> <span class="n">PlaintextCorpusReader</span><span class="p">(</span><span class="n">corpus_root</span><span class="p">,</span> <span class="s1">'.*'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Once again, to confirm the corpus has been constituted, we can call the <code>fileids()</code> method to list the files contained within the corpus.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus</span><span class="o">.</span><span class="n">fileids</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>['test_data_1.txt', 'test_data_2.txt', 'test_data_3.txt']</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If you have any questions, please feel free to reach out.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="litkm/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Learning to apply machine learning to litigation.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/litkm" title="litkm"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/LitigationKM" title="LitigationKM"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
