@@ -9,8 +9,8 @@
 <meta property="og:title" content="How to Load Text Files as a Corpus for NLTK in Google Colab" />
 <meta name="author" content="Charles Dobson" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="Featuring two approaches: in Colab or from Google Drive" />
-<meta property="og:description" content="Featuring two approaches: in Colab or from Google Drive" />
+<meta name="description" content="Featuring two approaches: in Colab and from Google Drive" />
+<meta property="og:description" content="Featuring two approaches: in Colab and from Google Drive" />
 <link rel="canonical" href="http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html" />
 <meta property="og:url" content="http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html" />
 <meta property="og:site_name" content="The LitKM Blog" />
@@ -18,7 +18,7 @@
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2021-03-12T00:00:00-06:00" />
 <script type="application/ld+json">
-{"url":"http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html","@type":"BlogPosting","headline":"How to Load Text Files as a Corpus for NLTK in Google Colab","dateModified":"2021-03-12T00:00:00-06:00","datePublished":"2021-03-12T00:00:00-06:00","image":"http://www.litkm.com/images/social_logo.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html"},"author":{"@type":"Person","name":"Charles Dobson"},"description":"Featuring two approaches: in Colab or from Google Drive","@context":"https://schema.org"}</script>
+{"url":"http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html","@type":"BlogPosting","headline":"How to Load Text Files as a Corpus for NLTK in Google Colab","dateModified":"2021-03-12T00:00:00-06:00","datePublished":"2021-03-12T00:00:00-06:00","image":"http://www.litkm.com/images/social_logo.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.litkm.com/natural%20language%20processing/preprocessing%20text/nltk/nlp/google%20colab/2021/03/12/Loading_Text_for_NLTK_in_Google_Colab.html"},"author":{"@type":"Person","name":"Charles Dobson"},"description":"Featuring two approaches: in Colab and from Google Drive","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://www.litkm.com/feed.xml" title="The LitKM Blog" /><!-- the google_analytics_id gets auto inserted from the config file -->
 
@@ -79,7 +79,7 @@ window.onload = wrap_img;
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">How to Load Text Files as a Corpus for NLTK in Google Colab</h1><p class="page-description">Featuring two approaches: in Colab or from Google Drive</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-03-12T00:00:00-06:00" itemprop="datePublished">
+    <h1 class="post-title p-name" itemprop="name headline">How to Load Text Files as a Corpus for NLTK in Google Colab</h1><p class="page-description">Featuring two approaches: in Colab and from Google Drive</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-03-12T00:00:00-06:00" itemprop="datePublished">
         Mar 12, 2021
       </time>• 
           <span itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -156,7 +156,7 @@ window.onload = wrap_img;
 <h1 id="Introduction">
 <a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
 </h1>
-<p>Most tutorials on NLTK presume you are working locally on your own machine as opposed to in a cloud environment such as Google Colab.</p>
+<p>Most tutorials on NLTK presume you are working locally as opposed to in a cloud environment such as Google Colab.</p>
 <p>In this blog post, I address using Google Colab to load text files for use as a corpus from:</p>
 <ol>
 <li>within Google Colab; and</li>
@@ -168,8 +168,8 @@ window.onload = wrap_img;
 </h1>
 <p>First, you must upload the text files into your Colab environment.</p>
 <p>Click on the file icon located on the left side of the screen. Navigate the file structure to where you wish to store the files.</p>
-<p>By default, your Colab environment will have a <code>/content</code> subfolder. For this post, I have created a subfolder called <code>/content/textfiles</code>. This is where I then uploaded the text files for the corpus. To upload, right click on the folder where you wish the files to be placed.</p>
-<p>In the below screen shot, you will see the file structure and the "test" text files I uploaded:</p>
+<p>By default, your Colab environment will have a <code>/content</code> subfolder. For this post, I created a subfolder called <code>/content/textfiles</code>. This is where I then uploaded the text files for the corpus. To upload, right click on the folder where you wish the files to be placed.</p>
+<p>In the below screen shot, you see the file structure and the "test" text files I uploaded.</p>
 <p><img src="/images/copied_from_nb/my_icons/colabfiles.png" alt=""></p>
 <p>Now we are ready to load the text files as a corpus. From hereon, the process is essentially the same as if you were working locally.</p>
 <p>For the limited purposes of this tutorial, the below dependencies are required.</p>
@@ -201,6 +201,7 @@ window.onload = wrap_img;
 <p>NLTK contains a class called <code>PlaintextCorpusReader()</code> for creating a corpus from text files.</p>
 <p>In the below example, we assign the directory where the files are located to a variable (<code>corpus_root</code>).</p>
 <p>We then instantiate an instance of <code>PlaintextCorpusReader()</code> and assign it to the variable <code>corpus</code>. The parameters indicate where to find the text files, and which files to include (in this example, all of them).</p>
+<p>Finally, to confirm the corpus has been constituted, we call the <code>fileids()</code> method to list the files contained within the corpus.</p>
 
 </div>
 </div>
@@ -214,31 +215,7 @@ window.onload = wrap_img;
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus_root</span> <span class="o">=</span> <span class="s1">'/content/textfiles'</span>
 <span class="n">corpus</span> <span class="o">=</span> <span class="n">PlaintextCorpusReader</span><span class="p">(</span><span class="n">corpus_root</span><span class="p">,</span> <span class="s1">'.*'</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div>
-    
-
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>To confirm the corpus has been constituted, we can call the <code>fileids()</code> method to list the files contained within the corpus.</p>
-
-</div>
-</div>
-</div>
-    
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus</span><span class="o">.</span><span class="n">fileids</span><span class="p">()</span>
+<span class="n">corpus</span><span class="o">.</span><span class="n">fileids</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -267,13 +244,13 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>If you are using a free Colab account, each time your disconnect from the runtime environment your text files will be deleted. To avoid this, either upgrade your Colab account or use Google drive.</p>
+<p>If you are using a free Colab account, each time your disconnect from the runtime environment your files will be deleted. To avoid this, either upgrade your Colab account or use Google drive.</p>
 <h1 id="Loading-from-Google-Drive">
 <a class="anchor" href="#Loading-from-Google-Drive" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading from Google Drive<a class="anchor-link" href="#Loading-from-Google-Drive"> </a>
 </h1>
-<p>The process for creating a corpus from textfiles located on your Google drive is similar to the above.</p>
-<p>First, upload the text files into your Google drive. Take note of the directory.</p>
-<p>In addition to the dependencies listed above, one more is required. This is to mount your Google drive in your Colab environment. Call the the mount method per the below and follow the instructions that result.</p>
+<p>The process for creating a corpus from text files located on your Google Drive is similar to the above. These instructions assume you are using the same Google account for both Colab and Google Drive.</p>
+<p>First, upload the text files into your Google Drive. Take note of the directory.</p>
+<p>In addition to the dependencies listed above, one more is required. This is to mount your Google Drive in your Colab environment. Then call the the mount method and follow the instructions that result.</p>
 
 </div>
 </div>
@@ -313,7 +290,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now your Google drive is mounted. The balance of the process is the same as above, i.e. as if you were working with the files directly in your Colab environment. Make sure to revise the file path as necessary.</p>
+<p>Now your Google Drive is mounted. The balance of the process is the same as above, i.e. as if you were working with the files directly in your Colab environment. Make sure to revise the file path as necessary.</p>
 
 </div>
 </div>
@@ -327,31 +304,7 @@ window.onload = wrap_img;
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus_root</span> <span class="o">=</span> <span class="s1">'/content/drive/MyDrive/Datasets'</span>
 <span class="n">corpus</span> <span class="o">=</span> <span class="n">PlaintextCorpusReader</span><span class="p">(</span><span class="n">corpus_root</span><span class="p">,</span> <span class="s1">'.*'</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div>
-    
-
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Once again, to confirm the corpus has been constituted, we can call the <code>fileids()</code> method to list the files contained within the corpus.</p>
-
-</div>
-</div>
-</div>
-    
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">corpus</span><span class="o">.</span><span class="n">fileids</span><span class="p">()</span>
+<span class="n">corpus</span><span class="o">.</span><span class="n">fileids</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -380,6 +333,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Now you are ready to start processing your corpus!</p>
 <p>If you have any questions, please feel free to reach out.</p>
 
 </div>
