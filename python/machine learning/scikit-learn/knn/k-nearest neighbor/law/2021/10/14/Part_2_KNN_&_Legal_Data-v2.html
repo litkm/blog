@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Finding Analogous Cases with K-Nearest Neighbor | The LitKM Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Finding Analogous Cases with K-Nearest Neighbor" />
+<meta name="author" content="Charles Dobson" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="How to use scikit-learn’s NearestNeighbors() to find matter analogues in tabular legal data" />
+<meta property="og:description" content="How to use scikit-learn’s NearestNeighbors() to find matter analogues in tabular legal data" />
+<link rel="canonical" href="http://www.litkm.com/python/machine%20learning/scikit-learn/knn/k-nearest%20neighbor/law/2021/10/14/Part_2_KNN_&_Legal_Data-v2.html" />
+<meta property="og:url" content="http://www.litkm.com/python/machine%20learning/scikit-learn/knn/k-nearest%20neighbor/law/2021/10/14/Part_2_KNN_&_Legal_Data-v2.html" />
+<meta property="og:site_name" content="The LitKM Blog" />
+<meta property="og:image" content="http://www.litkm.com/images/social_logo.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-10-14T00:00:00-05:00" />
+<script type="application/ld+json">
+{"url":"http://www.litkm.com/python/machine%20learning/scikit-learn/knn/k-nearest%20neighbor/law/2021/10/14/Part_2_KNN_&_Legal_Data-v2.html","@type":"BlogPosting","headline":"Finding Analogous Cases with K-Nearest Neighbor","dateModified":"2021-10-14T00:00:00-05:00","datePublished":"2021-10-14T00:00:00-05:00","image":"http://www.litkm.com/images/social_logo.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.litkm.com/python/machine%20learning/scikit-learn/knn/k-nearest%20neighbor/law/2021/10/14/Part_2_KNN_&_Legal_Data-v2.html"},"author":{"@type":"Person","name":"Charles Dobson"},"description":"How to use scikit-learn’s NearestNeighbors() to find matter analogues in tabular legal data","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://www.litkm.com/feed.xml" title="The LitKM Blog" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-188329463-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">The LitKM Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Finding Analogous Cases with K-Nearest Neighbor</h1><p class="page-description">How to use scikit-learn's NearestNeighbors() to find matter analogues in tabular legal data</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-10-14T00:00:00-05:00" itemprop="datePublished">
+        Oct 14, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Charles Dobson</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      16 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#machine learning">machine learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#scikit-learn">scikit-learn</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#KNN">KNN</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#k-nearest neighbor">k-nearest neighbor</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#law">law</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/litkm/blog/tree/master/_notebooks/2021-10-14-Part_2_KNN_&_Legal_Data - v2.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/litkm/blog/master?filepath=_notebooks%2F2021-10-14-Part_2_KNN_%26_Legal_Data+-+v2.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/litkm/blog/blob/master/_notebooks/2021-10-14-Part_2_KNN_&_Legal_Data - v2.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Introduction">Introduction </a></li>
+<li class="toc-entry toc-h1"><a href="#Applying-NearestNeighbors-to-Legal-Data">Applying NearestNeighbors to Legal Data </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#Importing-Dependencies-and-Loading-the-Dataset">Importing Dependencies and Loading the Dataset </a></li>
+<li class="toc-entry toc-h2"><a href="#The-Dataset">The Dataset </a></li>
+<li class="toc-entry toc-h2"><a href="#Normalizing-the-Dataset">Normalizing the Dataset </a></li>
+<li class="toc-entry toc-h2"><a href="#Creating-the-KNN-Model">Creating the KNN Model </a></li>
+<li class="toc-entry toc-h2"><a href="#Querying-the-Dataset">Querying the Dataset </a></li>
+<li class="toc-entry toc-h2"><a href="#Conclusion">Conclusion </a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#Final-Thoughts">Final Thoughts </a></li>
+<li class="toc-entry toc-h1"><a href="#Appendix">Appendix </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-10-14-Part_2_KNN_&_Legal_Data - v2.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction">
+<a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
+</h1>
+<p><em>Partner: What others cases like this has the firm handled in the past?</em></p>
+<p><em>Associate: Uhm... (starts thinking of search terms, cancels evening plans)</em></p>
+<p>In an earlier <a href="https://www.litkm.com/python/machine%20learning/scikit-learn/knn/law/2021/05/05/KNN_and_Legal_Data_v2.html">post</a>, I provided a brief introduction to the `NearestNeighbors()' class from Python's scikit-learn library. In this post, I demonstrate one way this algorithm can be applied to legal data in tabular form. The dataset I use comprises matter profiles of 10,000 (fake) cases. I show how 'NearestNeighbors()' can be used to query the dataset to find cases that are similar to each other.</p>
+<p>For a brief primer on KNN and further resources, please see my first post on this topic.</p>
+<h1 id="Applying-NearestNeighbors-to-Legal-Data">
+<a class="anchor" href="#Applying-NearestNeighbors-to-Legal-Data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Applying NearestNeighbors to Legal Data<a class="anchor-link" href="#Applying-NearestNeighbors-to-Legal-Data"> </a>
+</h1>
+<h2 id="Importing-Dependencies-and-Loading-the-Dataset">
+<a class="anchor" href="#Importing-Dependencies-and-Loading-the-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Importing Dependencies and Loading the Dataset<a class="anchor-link" href="#Importing-Dependencies-and-Loading-the-Dataset"> </a>
+</h2>
+<p>We begin with importing our dependencies and loading the dataset. For this demo, we only need the pandas library and the 'NearestNeighbors()' class from scikit-learn.</p>
+<p>The dataset is a CSV file hosted on the web (in my GitHub repository).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">NearestNeighbors</span>
+
+<span class="c1"># Load the dataset and remove one unnecessary column that was created when this DataFrame was converted into a CSV file</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="s1">'https://raw.githubusercontent.com/litkm/KNN-Project/main/cases_dataset.csv'</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'Unnamed: 0'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="The-Dataset">
+<a class="anchor" href="#The-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Dataset<a class="anchor-link" href="#The-Dataset"> </a>
+</h2>
+<p>Next, let's inspect the dataset.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Lawyer</th>
+      <th>Matter Type</th>
+      <th>Jurisdiction</th>
+      <th>Industry</th>
+      <th>Client Role</th>
+      <th>Tort</th>
+      <th>Contract</th>
+      <th>Restitution</th>
+      <th>Statute</th>
+      <th>Injunction</th>
+      <th>Jurisdiction Motion</th>
+      <th>Motion to Strike</th>
+      <th>Summary Judgment</th>
+      <th>Claim Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Lawyer Iota</td>
+      <td>Class Action (Securities)</td>
+      <td>British Columbia</td>
+      <td>Resources</td>
+      <td>Defendant</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>11907902</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lawyer Beta</td>
+      <td>Class Action (Competition)</td>
+      <td>British Columbia</td>
+      <td>Retail</td>
+      <td>Plaintiff</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>16003023</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lawyer Epsilon</td>
+      <td>Class Action (Privacy</td>
+      <td>Alberta</td>
+      <td>Pharmaceuticals</td>
+      <td>Plaintiff</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>19069229</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Lawyer Eta</td>
+      <td>Action (Commercial)</td>
+      <td>Ontario</td>
+      <td>Insurance</td>
+      <td>Defendant</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1244921</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Lawyer Theta</td>
+      <td>Class Action (Securities)</td>
+      <td>British Columbia</td>
+      <td>Technology</td>
+      <td>Plaintiff</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>6633831</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is a dataset of matter profiles:</p>
+<ul>
+<li>Each row represents one matter. </li>
+<li>Each column indicates a feature relating to these matters.</li>
+<li>There are ten different lawyers, eight matter types, five jurisdictions, eight industries, and three client roles.</li>
+<li>The columns labelled Tort, Contract, Restitution, and Statute relate to causes of action. A "1" indicates the type of cause of action applies to a given matter, whereas a "0" indicates it does not.</li>
+<li>The columns labelled Injunction, Jurisdiction Motion, Motion to Strike, and Summary Judgment relate to motions. A "1" indicates this type of motion occurred in a given matter, where as a "0" indicates it did not.</li>
+<li>The final column, Claim Amount, specifies the dollar amount of damages the plaintiff claimed.</li>
+</ul>
+<p>By way of example, let's take a closer look at the second matter in the dataset.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                                Lawyer Beta
+Matter Type            Class Action (Competition)
+Jurisdiction                     British Columbia
+Industry                                   Retail
+Client Role                             Plaintiff
+Tort                                            1
+Contract                                        1
+Restitution                                     1
+Statute                                         1
+Injunction                                      0
+Jurisdiction Motion                             1
+Motion to Strike                                1
+Summary Judgment                                0
+Claim Amount                             16003023
+Name: 1, dtype: object</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This entry indicates:</p>
+<ul>
+<li>Lawyer Beta is the lead lawyer. </li>
+<li>This is a competition class action filed in B.C. relating to the retail industry. </li>
+<li>The client is the plaintiff. </li>
+<li>The claim involves causes of action in tort, contract, restitution, and statute. </li>
+<li>There was no injunction. </li>
+<li>The matter involved motions relating to jurisdiction and striking a pleading, but not summary judgment. </li>
+<li>The plaintiff claims ~$16 million in damages. </li>
+</ul>
+<p>Per the below, this dataset contains 10,000 entries, i.e. matters.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 10000 entries, 0 to 9999
+Data columns (total 14 columns):
+ #   Column               Non-Null Count  Dtype 
+---  ------               --------------  ----- 
+ 0   Lawyer               10000 non-null  object
+ 1   Matter Type          10000 non-null  object
+ 2   Jurisdiction         10000 non-null  object
+ 3   Industry             10000 non-null  object
+ 4   Client Role          10000 non-null  object
+ 5   Tort                 10000 non-null  int64 
+ 6   Contract             10000 non-null  int64 
+ 7   Restitution          10000 non-null  int64 
+ 8   Statute              10000 non-null  int64 
+ 9   Injunction           10000 non-null  int64 
+ 10  Jurisdiction Motion  10000 non-null  int64 
+ 11  Motion to Strike     10000 non-null  int64 
+ 12  Summary Judgment     10000 non-null  int64 
+ 13  Claim Amount         10000 non-null  int64 
+dtypes: int64(9), object(5)
+memory usage: 1.1+ MB
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You can view the dataset in "raw" form at this <a href="https://raw.githubusercontent.com/litkm/KNN-Project/main/cases_dataset.csv">link</a>.</p>
+<p>The content of this dataset is entirely fake. I generated it randomly. If you would like to create your own datasets for experimenting with KNN, you can find the code I used in my <a href="https://github.com/litkm/KNN-Project/blob/main/KNN_Case_Dataset_Generator.ipynb">GitHub respository for this project</a>.</p>
+<h2 id="Normalizing-the-Dataset">
+<a class="anchor" href="#Normalizing-the-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Normalizing the Dataset<a class="anchor-link" href="#Normalizing-the-Dataset"> </a>
+</h2>
+<p>As is, the dataset is not in a form the KNN algorithm can process. We must make certain changes to it. First, we must scale the numerical features so they use a standard range. Second, we must convert the categorial features, i.e. the non-numerical features (e.g. the various lawyer names under the Lawyer column), into numbers. These two processes are forms of normalizing a dataset.</p>
+<p>Normalizing the numerical features requires converting them, as necessary, so that each references the same range. If this step is neglected, then high magnitude numbers can disproportionately influence the outcome of the calculations the computer performs. When scaled, each feature will be weighted equally in the outcome.</p>
+<p>In this instance, all of the numerical features are either "0" or "1", with the exception of Claim Amount. A sensible range for this dataset, therefore, is 0 to 1. Accordingly, we must scale the Claim Account column so that this data is converted into numbers within this range.</p>
+<p>This can be done using a technique called "min-max scaling", which involves applying the following formula:</p>
+<ul>
+<li>y = (x - min) / (max - min)</li>
+</ul>
+<p>That is, for each number in the Claim Amount column (x), we subtract from it the lowest Claim Amount (min), and we divide this result by the range between the highest Claim Amount (max) and the lowest Claim Amount (min). The final result is a value (y), which is a number scaled between 0 and 1.</p>
+<p>The code to do this is detailed below. We simply apply the min-max formula to every value in the Claim Amount column. Pandas has handy methods to identify the lowest and highest values in a DataFrame column (<code>min()</code> and <code>max()</code>).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Apply min-max scaling to Claim Amount; that is, y = (x - min) / (max - min) </span>
+
+<span class="n">column</span> <span class="o">=</span> <span class="s1">'Claim Amount'</span>
+<span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+
+<span class="c1"># Print the first five rows of the dataset to verify the technique worked</span>
+
+<span class="n">dataset</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Lawyer</th>
+      <th>Matter Type</th>
+      <th>Jurisdiction</th>
+      <th>Industry</th>
+      <th>Client Role</th>
+      <th>Tort</th>
+      <th>Contract</th>
+      <th>Restitution</th>
+      <th>Statute</th>
+      <th>Injunction</th>
+      <th>Jurisdiction Motion</th>
+      <th>Motion to Strike</th>
+      <th>Summary Judgment</th>
+      <th>Claim Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Lawyer Iota</td>
+      <td>Class Action (Securities)</td>
+      <td>British Columbia</td>
+      <td>Resources</td>
+      <td>Defendant</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0.585066</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lawyer Beta</td>
+      <td>Class Action (Competition)</td>
+      <td>British Columbia</td>
+      <td>Retail</td>
+      <td>Plaintiff</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0.795129</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lawyer Epsilon</td>
+      <td>Class Action (Privacy</td>
+      <td>Alberta</td>
+      <td>Pharmaceuticals</td>
+      <td>Plaintiff</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0.952412</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Lawyer Eta</td>
+      <td>Action (Commercial)</td>
+      <td>Ontario</td>
+      <td>Insurance</td>
+      <td>Defendant</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0.038099</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Lawyer Theta</td>
+      <td>Class Action (Securities)</td>
+      <td>British Columbia</td>
+      <td>Technology</td>
+      <td>Plaintiff</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.314528</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When we review the Claim Amount column now, we see each feature is now a number ranging between 0 and 1. If we were to review all 10,000 matters in this dataset, we would find the same result.</p>
+<p>Next, we must convert the categorical features into numbers. For this dataset, we'll use a technique called "one-hot encoding". With this approach, we create new columns for each of the different categorical features under a given column. Then, either a "1" or a "0" is assigned under each these new columns, depending on whether the feature applies to a given matter. If the feature applies, a "1" is used; if not, then a "0".</p>
+<p>For instance, under Client Role, there are three possible features: Plaintiff, Defendant, or Third Party. When we apply one-hot encoding to this column, we replace the generic Client Role column with three new columns: Plaintiff, Defendant, and Third Party. If the client in a given matter is a plaintiff, then a "1" is assigned under the Plaintiff column, and the Defendant and Third Party columns each receive a "0" for that particular matter.</p>
+<p>Conveniently, Pandas has a method called <code>get_dummies()</code>, which can be used to apply one-hot encoding to a DataFrame containing categorical features. Below, we use this method on the columns containing categorical features in our dataset. We then print out the first matter in the dataset to verify the technique has worked.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'Lawyer'</span><span class="p">,</span> <span class="s1">'Matter Type'</span><span class="p">,</span> <span class="s1">'Jurisdiction'</span><span class="p">,</span> <span class="s1">'Industry'</span><span class="p">,</span> <span class="s1">'Client Role'</span><span class="p">])</span>
+
+<span class="c1"># Print the first matter in the dataset to verify the encoding was successful</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Tort                                          0.000000
+Contract                                      0.000000
+Restitution                                   0.000000
+Statute                                       1.000000
+Injunction                                    1.000000
+Jurisdiction Motion                           1.000000
+Motion to Strike                              1.000000
+Summary Judgment                              1.000000
+Claim Amount                                  0.585066
+Lawyer_Lawyer Alpha                           0.000000
+Lawyer_Lawyer Beta                            0.000000
+Lawyer_Lawyer Delta                           0.000000
+Lawyer_Lawyer Epsilon                         0.000000
+Lawyer_Lawyer Eta                             0.000000
+Lawyer_Lawyer Gamma                           0.000000
+Lawyer_Lawyer Iota                            1.000000
+Lawyer_Lawyer Kappa                           0.000000
+Lawyer_Lawyer Theta                           0.000000
+Lawyer_Lawyer Zeta                            0.000000
+Matter Type_Action (Commercial)               0.000000
+Matter Type_Action (Privacy)                  0.000000
+Matter Type_Action (Product Liability)        0.000000
+Matter Type_Action (Securities)               0.000000
+Matter Type_Class Action (Competition)        0.000000
+Matter Type_Class Action (Privacy             0.000000
+Matter Type_Class Action (Product Liabilty    0.000000
+Matter Type_Class Action (Securities)         1.000000
+Jurisdiction_Alberta                          0.000000
+Jurisdiction_British Columbia                 1.000000
+Jurisdiction_Federal                          0.000000
+Jurisdiction_Ontario                          0.000000
+Jurisdiction_Quebec                           0.000000
+Industry_Banking                              0.000000
+Industry_Construction                         0.000000
+Industry_Insurance                            0.000000
+Industry_Pharmaceuticals                      0.000000
+Industry_Resources                            1.000000
+Industry_Retail                               0.000000
+Industry_Technology                           0.000000
+Industry_Transportation                       0.000000
+Client Role_Defendant                         1.000000
+Client Role_Plaintiff                         0.000000
+Client Role_Third Party                       0.000000
+Name: 0, dtype: float64</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Per the above, we can see each categorical feature has become a separate column, and whether the feature applies or not, is indicated with a "1" or a "0".</p>
+<p>Our dataset is now ready to be fed into the KNN algorithm.</p>
+<h2 id="Creating-the-KNN-Model">
+<a class="anchor" href="#Creating-the-KNN-Model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating the KNN Model<a class="anchor-link" href="#Creating-the-KNN-Model"> </a>
+</h2>
+<p>Next, we create our KNN model and load the dataset into it. As described in my <a href="(https://www.litkm.com/python/machine%20learning/scikit-learn/knn/law/2021/05/05/KNN_and_Legal_Data_v2.html">first post on KNN</a>, we do not need to code the algorithm from scratch. Rather, we can use the `NearestNeighbors()' class from Python's scikit-learn library. Easy, peasy!</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Run the dataset through the KNN algorithm</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>NearestNeighbors(algorithm='auto', leaf_size=30, metric='minkowski',
+                 metric_params=None, n_jobs=None, n_neighbors=4, p=2,
+                 radius=1.0)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When we create a model of the data using KNN, the algorithm plots each matter from the dataset in a multi-dimensional space. The algorithm calculates the location of each matter based on its features. Since this dataset (once normalized) has 43 features, the algorithm plots the matters in a 43-dimensional space!</p>
+<p>To find matter analogues, the algorithm will calculate the distance between a specified matter and those nearest to it in this 43-dimensional space. The less distance between the specified matter and those nearest to it, the more similiar the matters will be.</p>
+<p>When we create our model per the code above, we configure the algorithm to return the four nearest neighbors to our specificed matter. The first "nearest neighbor" is always the specified matter itself. We'll ignore this. Instead, we'll be interested in the three other matters - i.e. the three nearest neighbors.</p>
+<p>Now we can use our model to find matter analogues in our dataset of 10,000 cases!</p>
+<h2 id="Querying-the-Dataset">
+<a class="anchor" href="#Querying-the-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Querying the Dataset<a class="anchor-link" href="#Querying-the-Dataset"> </a>
+</h2>
+<p>Let's look at a case. The below matter profile is at row 257 of the dataset.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">257</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                               Lawyer Zeta
+Matter Type            Class Action (Securities)
+Jurisdiction                             Federal
+Industry                               Insurance
+Client Role                            Defendant
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               0
+Claim Amount                            11953137
+Name: 257, dtype: object</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the next line of code, we use the algorithm to query the dataset to identify the cases most similiar to this one.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">([</span><span class="n">dataset</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">257</span><span class="p">]]))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>(array([[0.        , 0.08120263, 1.73799853, 2.0000405 ]]), array([[ 257, 2582, 8283, 2373]]))
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This code returns two lists. The first list contains the distance measurements between our specified matter and its four nearest neighbors. The second list provides the row index from the dataset for these nearest neighbors.</p>
+<p>As noted above, the first nearest neighbor is the specified matter itself. We'll ignore it. Let's examine the second matter, located at row 2582 of our dateset. Notably, this matter has a distance measurement less than 1. We can anticipate matters 257 and 2582 will be very similar.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2582</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                               Lawyer Zeta
+Matter Type            Class Action (Securities)
+Jurisdiction                             Federal
+Industry                               Insurance
+Client Role                            Defendant
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               0
+Claim Amount                            10370112
+Name: 2582, dtype: object</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Indeed, when we compare these matters, we see they are virtually identical. They differ only in the amount of money the plaintiff is claiming.</p>
+<p>The next nearest neighbor is matter 8283.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">8283</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                               Lawyer Zeta
+Matter Type            Class Action (Securities)
+Jurisdiction                             Ontario
+Industry                               Insurance
+Client Role                            Defendant
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               1
+Claim Amount                            14753800
+Name: 8283, dtype: object</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This matter differs from our target matter in only three respects: Jurisdiction, Claim Amount, and it has a summary judgment motion.</p>
+<p>Let's look at the last of the nearest neighbors, matter 2373.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2373</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                              Lawyer Alpha
+Matter Type            Class Action (Securities)
+Jurisdiction                             Federal
+Industry                               Insurance
+Client Role                            Plaintiff
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               0
+Claim Amount                            11705007
+Name: 2373, dtype: object</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This matter also differs from our target matter in only three respects: Lawyer, Client Role, and Claim Amount.</p>
+<h2 id="Conclusion">
+<a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
+</h2>
+<p>Although there are 10,000 cases in this dataset, using the KNN algorithm we can find accurate matter analogues within seconds!</p>
+<p>That said, we need the right dataset. KNN can only take data in a structured form, and structured data is often in short supply.</p>
+<h1 id="Final-Thoughts">
+<a class="anchor" href="#Final-Thoughts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Final Thoughts<a class="anchor-link" href="#Final-Thoughts"> </a>
+</h1>
+<p>Have you experimented with using KNN on legal data? Please reach out!</p>
+<h1 id="Appendix">
+<a class="anchor" href="#Appendix" aria-hidden="true"><span class="octicon octicon-link"></span></a>Appendix<a class="anchor-link" href="#Appendix"> </a>
+</h1>
+<p>For ease of review, all of the code from this post is set out below.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="c1"># Import dependencies</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">NearestNeighbors</span>
+
+<span class="c1"># Load the dataset and remove one unnecessary column that was created when this DataFrame was converted into a CSV file</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="s1">'https://raw.githubusercontent.com/litkm/KNN-Project/main/cases_dataset.csv'</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'Unnamed: 0'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Print the first 5 rows from the DataFrame</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+
+<span class="c1"># Print data at row 1 of the DataFrame</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Print summary of the DataFrame</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+
+<span class="c1"># Copy the dataset into a new DataFrame. We will refer to the preprocessed DataFrame later because it is easier to read</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Apply min-max scaling to Claim Amount; that is, y = (x - min) / (max - min) </span>
+
+<span class="n">column</span> <span class="o">=</span> <span class="s1">'Claim Amount'</span>
+<span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">dataset</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+
+<span class="c1"># Print the first five rows of the dataset to verify the technique worked</span>
+
+<span class="n">dataset</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+
+<span class="c1"># One-hot encode the categorical columns </span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'Lawyer'</span><span class="p">,</span> <span class="s1">'Matter Type'</span><span class="p">,</span> <span class="s1">'Jurisdiction'</span><span class="p">,</span> <span class="s1">'Industry'</span><span class="p">,</span> <span class="s1">'Client Role'</span><span class="p">])</span>
+
+<span class="c1"># Print the first matter in the dataset to verify the encoding was successful</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Initialize a NearestNeighbors() object and assign it to the variable 'model'</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Run the dataset through the KNN algorithm</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+<span class="c1"># Print row 257 of the DataFrame</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">257</span><span class="p">])</span>
+
+<span class="c1"># Print the four nearest neighbors to row 257 in the DataFrame</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">([</span><span class="n">dataset</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">257</span><span class="p">]]))</span>
+
+<span class="c1"># Print row 2582 of the DataFrame</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2582</span><span class="p">])</span>
+
+<span class="c1"># Print row 8283 of the DataFrame</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">8283</span><span class="p">])</span>
+
+<span class="c1"># Print row 2373 of the DataFrame</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2373</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                                Lawyer Beta
+Matter Type            Class Action (Competition)
+Jurisdiction                     British Columbia
+Industry                                   Retail
+Client Role                             Plaintiff
+Tort                                            1
+Contract                                        1
+Restitution                                     1
+Statute                                         1
+Injunction                                      0
+Jurisdiction Motion                             1
+Motion to Strike                                1
+Summary Judgment                                0
+Claim Amount                             16003023
+Name: 1, dtype: object</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 10000 entries, 0 to 9999
+Data columns (total 14 columns):
+ #   Column               Non-Null Count  Dtype 
+---  ------               --------------  ----- 
+ 0   Lawyer               10000 non-null  object
+ 1   Matter Type          10000 non-null  object
+ 2   Jurisdiction         10000 non-null  object
+ 3   Industry             10000 non-null  object
+ 4   Client Role          10000 non-null  object
+ 5   Tort                 10000 non-null  int64 
+ 6   Contract             10000 non-null  int64 
+ 7   Restitution          10000 non-null  int64 
+ 8   Statute              10000 non-null  int64 
+ 9   Injunction           10000 non-null  int64 
+ 10  Jurisdiction Motion  10000 non-null  int64 
+ 11  Motion to Strike     10000 non-null  int64 
+ 12  Summary Judgment     10000 non-null  int64 
+ 13  Claim Amount         10000 non-null  int64 
+dtypes: int64(9), object(5)
+memory usage: 1.1+ MB
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Tort                                          0.000000
+Contract                                      0.000000
+Restitution                                   0.000000
+Statute                                       1.000000
+Injunction                                    1.000000
+Jurisdiction Motion                           1.000000
+Motion to Strike                              1.000000
+Summary Judgment                              1.000000
+Claim Amount                                  0.585066
+Lawyer_Lawyer Alpha                           0.000000
+Lawyer_Lawyer Beta                            0.000000
+Lawyer_Lawyer Delta                           0.000000
+Lawyer_Lawyer Epsilon                         0.000000
+Lawyer_Lawyer Eta                             0.000000
+Lawyer_Lawyer Gamma                           0.000000
+Lawyer_Lawyer Iota                            1.000000
+Lawyer_Lawyer Kappa                           0.000000
+Lawyer_Lawyer Theta                           0.000000
+Lawyer_Lawyer Zeta                            0.000000
+Matter Type_Action (Commercial)               0.000000
+Matter Type_Action (Privacy)                  0.000000
+Matter Type_Action (Product Liability)        0.000000
+Matter Type_Action (Securities)               0.000000
+Matter Type_Class Action (Competition)        0.000000
+Matter Type_Class Action (Privacy             0.000000
+Matter Type_Class Action (Product Liabilty    0.000000
+Matter Type_Class Action (Securities)         1.000000
+Jurisdiction_Alberta                          0.000000
+Jurisdiction_British Columbia                 1.000000
+Jurisdiction_Federal                          0.000000
+Jurisdiction_Ontario                          0.000000
+Jurisdiction_Quebec                           0.000000
+Industry_Banking                              0.000000
+Industry_Construction                         0.000000
+Industry_Insurance                            0.000000
+Industry_Pharmaceuticals                      0.000000
+Industry_Resources                            1.000000
+Industry_Retail                               0.000000
+Industry_Technology                           0.000000
+Industry_Transportation                       0.000000
+Client Role_Defendant                         1.000000
+Client Role_Plaintiff                         0.000000
+Client Role_Third Party                       0.000000
+Name: 0, dtype: float64</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                               Lawyer Zeta
+Matter Type            Class Action (Securities)
+Jurisdiction                             Federal
+Industry                               Insurance
+Client Role                            Defendant
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               0
+Claim Amount                            11953137
+Name: 257, dtype: object</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>(array([[0.        , 0.08120263, 1.73799853, 2.0000405 ]]), array([[ 257, 2582, 8283, 2373]]))
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                               Lawyer Zeta
+Matter Type            Class Action (Securities)
+Jurisdiction                             Federal
+Industry                               Insurance
+Client Role                            Defendant
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               0
+Claim Amount                            10370112
+Name: 2582, dtype: object</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                               Lawyer Zeta
+Matter Type            Class Action (Securities)
+Jurisdiction                             Ontario
+Industry                               Insurance
+Client Role                            Defendant
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               1
+Claim Amount                            14753800
+Name: 8283, dtype: object</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea ">
+<pre>Lawyer                              Lawyer Alpha
+Matter Type            Class Action (Securities)
+Jurisdiction                             Federal
+Industry                               Insurance
+Client Role                            Plaintiff
+Tort                                           0
+Contract                                       0
+Restitution                                    1
+Statute                                        0
+Injunction                                     0
+Jurisdiction Motion                            1
+Motion to Strike                               0
+Summary Judgment                               0
+Claim Amount                            11705007
+Name: 2373, dtype: object</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="litkm/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/python/machine%20learning/scikit-learn/knn/k-nearest%20neighbor/law/2021/10/14/Part_2_KNN_&_Legal_Data-v2.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Learning to apply machine learning to litigation.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/litkm" title="litkm"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/LitigationKM" title="LitigationKM"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
