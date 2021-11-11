@@ -87,7 +87,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      6 min read
+      7 min read
     
 </span></p>
 
@@ -174,7 +174,7 @@ window.onload = wrap_img;
 <h1 id="Introduction">
 <a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
 </h1>
-<p>In previous posts, I've written about using a neural network to predict SCOTUS judging.<sup id="fnref-1" class="footnote-ref"><a href="#fn-1">1</a></sup> These posts were based on lesson 8 from  Prof. Wolfgang Alschner's fantastic course, <a href="https://www.datascienceforlawyers.org/">Data Science for Lawyers</a>. In this lesson, Prof. Alschner reviews how to use several machine learning algorithms, including <em>k</em>-nearest neighbor, to predict Justice Brennan's voting record.</p>
+<p>In previous posts, I've written about using a neural network to predict SCOTUS judging.<sup id="fnref-1" class="footnote-ref"><a href="#fn-1">1</a></sup> These posts were based on lesson 8 from  Prof. Wolfgang Alschner's fantastic course, <a href="https://www.datascienceforlawyers.org/">Data Science for Lawyers</a>. In this lesson, Prof. Alschner reviews several machine learning algorithms, including <em>k</em>-nearest neighbor, and explains how to use them to predict Justice Brennan's voting record.</p>
 <p>In the course, Prof. Alschner uses the R programming language. I don't know R, but I do know some Python. So I thought I'd use Python to apply <em>k</em>-nearest neighbor to the same Justice Brennan dataset. In this post, I show how to use the <code>KNeighborsClassifier()</code> class from scikit-learn for this purpose.</p>
 
 </div>
@@ -226,7 +226,7 @@ window.onload = wrap_img;
 <a class="anchor" href="#Loading-and-Splitting-the-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading and Splitting the Dataset<a class="anchor-link" href="#Loading-and-Splitting-the-Dataset"> </a>
 </h1>
 <p>We then load the dataset from a CSV and turn it into a DataFrame.</p>
-<p>Next, we split this dataset into training features and labels, and testing features and labels. In lesson 8, the algorithm is trained on voting data prior to 1980 and tested on voting data from 1980 and onwards. So we'll split our dataset accordingly.</p>
+<p>Next, we split this dataset into training features and labels, and testing features and labels. In lesson 8, the KNN model is trained on Justice Brennan's voting data prior to 1980 and tested on his voting data from 1980 and onwards. So we'll split our dataset accordingly.</p>
 
 </div>
 </div>
@@ -241,16 +241,16 @@ window.onload = wrap_img;
 <div class=" highlight hl-python"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">'https://raw.githubusercontent.com/litkm/WJBrennan-Voting/main/WJBrennan_voting.csv'</span>
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 
-<span class="c1"># Features</span>
+<span class="c1">#Features</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[[</span><span class="s1">'term'</span><span class="p">,</span> <span class="s1">'petitioner'</span><span class="p">,</span> <span class="s1">'respondent'</span><span class="p">,</span> <span class="s1">'jurisdiction'</span><span class="p">,</span> <span class="s1">'caseOrigin'</span><span class="p">,</span> <span class="s1">'caseSource'</span><span class="p">,</span> <span class="s1">'certReason'</span><span class="p">,</span> <span class="s1">'issue'</span><span class="p">,</span> <span class="s1">'issueArea'</span><span class="p">]]</span>
 
-<span class="c1"># Labels</span>
+<span class="c1">#Labels</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">'vote'</span><span class="p">]</span>
 
-<span class="c1"># Features for training</span>
+<span class="c1">#Features for training</span>
 <span class="n">X_train</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">'term'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1980</span><span class="p">]</span> 
 
-<span class="c1"># Features for testing</span>
+<span class="c1">#Features for testing</span>
 <span class="n">X_test</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">'term'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1979</span><span class="p">]</span>  
 
 <span class="c1">#Labels for training</span>
@@ -273,8 +273,8 @@ window.onload = wrap_img;
 <h1 id="Normalizing-the-Dataset">
 <a class="anchor" href="#Normalizing-the-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Normalizing the Dataset<a class="anchor-link" href="#Normalizing-the-Dataset"> </a>
 </h1>
-<p>Now we must normalize the dataset. The features consist of numbers, all of varying ranges. So need to scale them to use the same range.</p>
-<p>The labels consist of one of two words, either "majority" or "minority". We convert these labels into either a "1" (majority) or a "0" minority.</p>
+<p>Now we must normalize the dataset. The features consist of numbers, all of varying ranges. So we need to scale them to use the same range.</p>
+<p>The labels consist of one of two words, either "majority" or "minority". We must convert these categorical labels into either a "1" (majority) or a "0" (minority).</p>
 
 </div>
 </div>
@@ -286,13 +286,15 @@ window.onload = wrap_img;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span></span><span class="n">columns_for_standard</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'term'</span><span class="p">,</span> <span class="s1">'petitioner'</span><span class="p">,</span> <span class="s1">'respondent'</span><span class="p">,</span> <span class="s1">'jurisdiction'</span><span class="p">,</span> <span class="s1">'caseOrigin'</span><span class="p">,</span> <span class="s1">'caseSource'</span><span class="p">,</span> <span class="s1">'certReason'</span><span class="p">,</span> <span class="s1">'issue'</span><span class="p">,</span> <span class="s1">'issueArea'</span><span class="p">]</span>
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#Scale features</span>
+<span class="n">columns_for_standard</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'term'</span><span class="p">,</span> <span class="s1">'petitioner'</span><span class="p">,</span> <span class="s1">'respondent'</span><span class="p">,</span> <span class="s1">'jurisdiction'</span><span class="p">,</span> <span class="s1">'caseOrigin'</span><span class="p">,</span> <span class="s1">'caseSource'</span><span class="p">,</span> <span class="s1">'certReason'</span><span class="p">,</span> <span class="s1">'issue'</span><span class="p">,</span> <span class="s1">'issueArea'</span><span class="p">]</span>
 
 <span class="n">ct</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([(</span><span class="s1">'numeric'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">columns_for_standard</span><span class="p">)])</span>
 
 <span class="n">X_train</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span> 
 <span class="n">X_test</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
+<span class="c1">#Convert categorical labels to numbers</span>
 <span class="n">le</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span>
 <span class="n">Y_train</span> <span class="o">=</span> <span class="n">le</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Y_train</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
 <span class="n">Y_test</span> <span class="o">=</span> <span class="n">le</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Y_test</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
@@ -326,7 +328,6 @@ window.onload = wrap_img;
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-python"><pre><span></span><span class="n">knn</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-
 <span class="n">knn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">)</span>
 </pre></div>
 
@@ -375,7 +376,7 @@ window.onload = wrap_img;
     <div class="input_area">
 <div class=" highlight hl-python"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">knn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Accuracy:"</span><span class="p">,</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">Y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Accuracy:"</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">Y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
 </pre></div>
 
     </div>
@@ -402,7 +403,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Interestingly, this model does not perform as well as the KNN model in <em>Data Science for Lawyers</em>. Whereas our model is predicting Justice Brennan's voting record at about 64% accuracy, the model in the lesson from DSL reaches 69% (0.6879536).</p>
+<p>Interestingly, this model does not perform as well as the KNN model in <em>Data Science for Lawyers</em>. Whereas our model is predicting Justice Brennan's voting record at about 64% accuracy, the model in the lesson from <em>DSL</em> reaches 69% (0.6879536).</p>
 <p>This is a significant difference. I'll return to this to explore further later in this post.</p>
 <h1 id="Improving-Model-Accuracy">
 <a class="anchor" href="#Improving-Model-Accuracy" aria-hidden="true"><span class="octicon octicon-link"></span></a>Improving Model Accuracy<a class="anchor-link" href="#Improving-Model-Accuracy"> </a>
@@ -420,7 +421,8 @@ window.onload = wrap_img;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#Loop through nearest neighbor configurations ranging from 1-100</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">accuracies</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">101</span><span class="p">):</span>
   <span class="n">classifier</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">k</span><span class="p">)</span>
@@ -428,6 +430,7 @@ window.onload = wrap_img;
   <span class="n">accuracies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">))</span>
   <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
 
+<span class="c1">#Plot results</span>
 <span class="n">k_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"k"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Validation Accuracy"</span><span class="p">)</span>
@@ -462,8 +465,8 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now we can see some improvements. Accuracy tops out at slightly more than 68% when using 17 nearest neighbors.</p>
-<p>Notwithstanding improvement, this model is still not performing as well as the one in the DSL lesson.</p>
+<p>Now we can see some improvements. Accuracy tops out at slightly more than 68% when using around 17 nearest neighbors.</p>
+<p>Notwithstanding improvement, this model is still not performing as well as the one in the <em>DSL</em> lesson.</p>
 <p>I believe this difference in performance is likely due either to differences in the way</p>
 <ul>
 <li>the dataset was normalized; or</li>
@@ -482,7 +485,8 @@ window.onload = wrap_img;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span></span><span class="n">X_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#Convert the features from numpy arrays to DataFrames in prep for min-max scaling, and ease of review</span>
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
 <span class="n">X_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 
 <span class="n">X_train</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -617,7 +621,8 @@ window.onload = wrap_img;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span></span><span class="nb">min</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>    
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#Apply min-max scaling to the training features</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>    
 <span class="nb">max</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>    
 <span class="n">X_train</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_train</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">max</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span>
 
@@ -637,7 +642,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now let's inspect the features, post re-scaling.</p>
+<p>Let's inspect the features, post re-scaling.</p>
 
 </div>
 </div>
@@ -769,7 +774,7 @@ window.onload = wrap_img;
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>That's better. Now let's create a new model that is trained on this re-scaled dataset, and test it's accuracy.</p>
+<p>This looks encouraging. To confirm, we can review the minimum and maximum values from each column. First, we'll review the minimum values.</p>
 
 </div>
 </div>
@@ -781,7 +786,109 @@ window.onload = wrap_img;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span></span><span class="n">Y_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Y_train</span><span class="p">)</span>
+<div class=" highlight hl-python"><pre><span></span><span class="n">X_train</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0    0.000000
+1    0.028644
+2    0.051736
+3    0.115035
+4    0.042554
+5    0.069430
+6    0.016060
+7    0.023569
+8    0.023928
+dtype: float64</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Excellent. We've bottomed out at 0. Second, let's look at the max values.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">X_train</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0    0.280976
+1    0.426978
+2    0.458090
+3    1.000000
+4    0.279148
+5    0.281644
+6    0.233991
+7    0.302108
+8    0.302223
+dtype: float64</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Perfect. We've topped out at 1. So we've confirmed all of the features are scaled to range between 0 and 1, same as the labels.</p>
+<p>Now let's create a new model that is trained on this re-scaled dataset, and test it's accuracy.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#First, convert the labels to DataFrames from numpy arrays (because the features are now DataFrames)</span>
+<span class="n">Y_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Y_train</span><span class="p">)</span>
 <span class="n">Y_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Y_test</span><span class="p">)</span>
 
 <span class="c1">#Create and train the model</span>
@@ -830,7 +937,8 @@ window.onload = wrap_img;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#Loop through nearest neighbor configurations ranging from 1-100</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">accuracies</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">101</span><span class="p">):</span>
   <span class="n">classifier</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">k</span><span class="p">)</span>
@@ -838,6 +946,7 @@ window.onload = wrap_img;
   <span class="n">accuracies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">))</span>
   <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
 
+<span class="c1">#Plot results</span>
 <span class="n">k_list</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"k"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Validation Accuracy"</span><span class="p">)</span>
@@ -876,7 +985,7 @@ window.onload = wrap_img;
 <h1 id="Final-Thoughts">
 <a class="anchor" href="#Final-Thoughts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Final Thoughts<a class="anchor-link" href="#Final-Thoughts"> </a>
 </h1>
-<p>I wonder how the performance of the KNN model in lesson 8 of DSL would vary if tested using a range of <code>k</code> configurations. If you have done this, or otherwise have any thoughts on the performance of these models, please reach out!</p>
+<p>I wonder how the performance of the KNN model in lesson 8 of <em>DSL</em> would vary if tested using a range of <code>k</code> configurations. If you have done this, or otherwise have any thoughts on the performance of these models, please reach out!</p>
 <p></p>
 <div class="footnotes"><p id="fn-1">1. See <a href="https://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/law/general/2021/02/11/AI_and_SCOTUS_Judging.html">Using Artificial Intelligence to Predict SCOTUS Judging</a> and <a href="https://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/2021/02/26/Parsing_Model.html">Parsing a Neural Network to Predict SCOTUS Judging</a>.<a href="#fnref-1" class="footnote footnotes">↩</a></p></div>
 <p></p>
