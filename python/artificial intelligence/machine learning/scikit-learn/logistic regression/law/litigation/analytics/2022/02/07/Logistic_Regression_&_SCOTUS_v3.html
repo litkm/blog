@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>How to Use Logistic Regression to Predict SCOTUS Judging | The LitKM Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="How to Use Logistic Regression to Predict SCOTUS Judging" />
+<meta name="author" content="Charles Dobson" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Predicting Justice Brennan’s voting record with logistic regression" />
+<meta property="og:description" content="Predicting Justice Brennan’s voting record with logistic regression" />
+<link rel="canonical" href="http://www.litkm.com/python/artificial%20intelligence/machine%20learning/scikit-learn/logistic%20regression/law/litigation/analytics/2022/02/07/Logistic_Regression_&_SCOTUS_v3.html" />
+<meta property="og:url" content="http://www.litkm.com/python/artificial%20intelligence/machine%20learning/scikit-learn/logistic%20regression/law/litigation/analytics/2022/02/07/Logistic_Regression_&_SCOTUS_v3.html" />
+<meta property="og:site_name" content="The LitKM Blog" />
+<meta property="og:image" content="http://www.litkm.com/images/social_logo.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-02-07T00:00:00-06:00" />
+<script type="application/ld+json">
+{"url":"http://www.litkm.com/python/artificial%20intelligence/machine%20learning/scikit-learn/logistic%20regression/law/litigation/analytics/2022/02/07/Logistic_Regression_&_SCOTUS_v3.html","@type":"BlogPosting","headline":"How to Use Logistic Regression to Predict SCOTUS Judging","dateModified":"2022-02-07T00:00:00-06:00","datePublished":"2022-02-07T00:00:00-06:00","image":"http://www.litkm.com/images/social_logo.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.litkm.com/python/artificial%20intelligence/machine%20learning/scikit-learn/logistic%20regression/law/litigation/analytics/2022/02/07/Logistic_Regression_&_SCOTUS_v3.html"},"author":{"@type":"Person","name":"Charles Dobson"},"description":"Predicting Justice Brennan’s voting record with logistic regression","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://www.litkm.com/feed.xml" title="The LitKM Blog" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-188329463-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">The LitKM Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How to Use Logistic Regression to Predict SCOTUS Judging</h1><p class="page-description">Predicting Justice Brennan's voting record with logistic regression</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2022-02-07T00:00:00-06:00" itemprop="datePublished">
+        Feb 7, 2022
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Charles Dobson</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      4 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#artificial intelligence">artificial intelligence</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#machine learning">machine learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#scikit-learn">scikit-learn</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#logistic regression">logistic regression</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#law">law</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#litigation">litigation</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#analytics">analytics</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/litkm/blog/tree/master/_notebooks/2022-02-07-Logistic_Regression_&_SCOTUS_v3.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/litkm/blog/master?filepath=_notebooks%2F2022-02-07-Logistic_Regression_%26_SCOTUS_v3.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/litkm/blog/blob/master/_notebooks/2022-02-07-Logistic_Regression_&_SCOTUS_v3.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Introduction">Introduction </a></li>
+<li class="toc-entry toc-h1"><a href="#Logistic-Regression">Logistic Regression </a></li>
+<li class="toc-entry toc-h1"><a href="#The-Dataset">The Dataset </a></li>
+<li class="toc-entry toc-h1"><a href="#Importing-Dependencies">Importing Dependencies </a></li>
+<li class="toc-entry toc-h1"><a href="#Loading-and-Splitting-the-Dataset">Loading and Splitting the Dataset </a></li>
+<li class="toc-entry toc-h1"><a href="#Normalizing-the-Dataset">Normalizing the Dataset </a></li>
+<li class="toc-entry toc-h1"><a href="#The-Logistic-Regression-Model">The Logistic Regression Model </a></li>
+<li class="toc-entry toc-h1"><a href="#Final-Thoughts">Final Thoughts </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2022-02-07-Logistic_Regression_&_SCOTUS_v3.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction">
+<a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
+</h1>
+<p>In previous posts, I've written about using a neural network and <em>k</em>-nearest neighbor to predict SCOTUS judging.<sup id="fnref-1" class="footnote-ref"><a href="#fn-1">1</a></sup> These posts were based on lesson 8 from  Prof. Wolfgang Alschner's fantastic course, <a href="https://www.datascienceforlawyers.org/">Data Science for Lawyers</a>. In this lesson, Prof. Alschner reviews several machine learning algorithms and explains how to use them to predict Justice Brennan's voting record.</p>
+<p>Logistic regression is not among the algorithms Prof. Alschner discusses. I was curious about how this algorithm would perform. In this post, I apply a logistic regression model to the Justice Brennan dataset. To do this, I use the <code>LogisticRegression()</code> class from scikit-learn.</p>
+<h1 id="Logistic-Regression">
+<a class="anchor" href="#Logistic-Regression" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logistic Regression<a class="anchor-link" href="#Logistic-Regression"> </a>
+</h1>
+<p>In a nutshell, logistic regression is a supervised machine learning algorithm that can be used for classification. In its simpler forms, it predicts the probability of a datapoint belonging to one group or another.</p>
+<p>In this post, I use a logistic regression model to predict whether Justice Brennan votes with the majority of the court in relation to 4746 cases.</p>
+<h1 id="The-Dataset">
+<a class="anchor" href="#The-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Dataset<a class="anchor-link" href="#The-Dataset"> </a>
+</h1>
+<p>You can find an overview of the dataset in my earlier post, <a href="https://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/law/general/2021/02/11/AI_and_SCOTUS_Judging.html">Using Artificial Intelligence to Predict SCOTUS Judging</a>.</p>
+<h1 id="Importing-Dependencies">
+<a class="anchor" href="#Importing-Dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Importing Dependencies<a class="anchor-link" href="#Importing-Dependencies"> </a>
+</h1>
+<p>As usual, we begin by importing our dependencies.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span><span class="p">,</span> <span class="n">LabelEncoder</span>
+<span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Loading-and-Splitting-the-Dataset">
+<a class="anchor" href="#Loading-and-Splitting-the-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading and Splitting the Dataset<a class="anchor-link" href="#Loading-and-Splitting-the-Dataset"> </a>
+</h1>
+<p>The next steps to building this model are very similar to the other models I've reviewed on LitKM to date.</p>
+<p>So, we first load the dataset from a CSV and turn it into a DataFrame.</p>
+<p>Next, we split this dataset into training features and labels, and testing features and labels.</p>
+<p>In lesson 8, each model is trained on Justice Brennan's voting data prior to 1980 and tested on his voting data from 1980 and onwards. So we'll split our dataset likewise.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">'https://raw.githubusercontent.com/litkm/WJBrennan-Voting/main/WJBrennan_voting.csv'</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+<span class="c1">#Features</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[[</span><span class="s1">'term'</span><span class="p">,</span> <span class="s1">'petitioner'</span><span class="p">,</span> <span class="s1">'respondent'</span><span class="p">,</span> <span class="s1">'jurisdiction'</span><span class="p">,</span> <span class="s1">'caseOrigin'</span><span class="p">,</span> <span class="s1">'caseSource'</span><span class="p">,</span> <span class="s1">'certReason'</span><span class="p">,</span> <span class="s1">'issue'</span><span class="p">,</span> <span class="s1">'issueArea'</span><span class="p">]]</span>
+
+<span class="c1">#Labels</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">'vote'</span><span class="p">]</span>
+
+<span class="c1">#Features for training</span>
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">'term'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1980</span><span class="p">]</span> 
+
+<span class="c1">#Features for testing</span>
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">'term'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1979</span><span class="p">]</span>  
+
+<span class="c1">#Labels for training</span>
+<span class="n">Y_train</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3368</span><span class="p">]</span>      
+
+<span class="c1">#Labels for testing</span>
+<span class="n">Y_test</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">3367</span><span class="p">:</span><span class="mi">4745</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Normalizing-the-Dataset">
+<a class="anchor" href="#Normalizing-the-Dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Normalizing the Dataset<a class="anchor-link" href="#Normalizing-the-Dataset"> </a>
+</h1>
+<p>Now we must normalize the dataset. The features consist of numbers, all of varying ranges. So we need to scale them to use the same range.</p>
+<p>The labels consist of one of two words, either "majority" or "minority". We must convert these categorical labels into either a "1" (majority) or a "0" (minority).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#Scale features</span>
+<span class="n">columns_for_standard</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'term'</span><span class="p">,</span> <span class="s1">'petitioner'</span><span class="p">,</span> <span class="s1">'respondent'</span><span class="p">,</span> <span class="s1">'jurisdiction'</span><span class="p">,</span> <span class="s1">'caseOrigin'</span><span class="p">,</span> <span class="s1">'caseSource'</span><span class="p">,</span> <span class="s1">'certReason'</span><span class="p">,</span> <span class="s1">'issue'</span><span class="p">,</span> <span class="s1">'issueArea'</span><span class="p">]</span>
+
+<span class="n">ct</span> <span class="o">=</span> <span class="n">ColumnTransformer</span><span class="p">([(</span><span class="s1">'numeric'</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">columns_for_standard</span><span class="p">)])</span>
+
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span> 
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1">#Convert categorical labels to numbers</span>
+<span class="n">le</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span>
+<span class="n">Y_train</span> <span class="o">=</span> <span class="n">le</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">Y_train</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+<span class="n">Y_test</span> <span class="o">=</span> <span class="n">le</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Y_test</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we are ready to create our model and train it on the dataset.</p>
+<h1 id="The-Logistic-Regression-Model">
+<a class="anchor" href="#The-Logistic-Regression-Model" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Logistic Regression Model<a class="anchor-link" href="#The-Logistic-Regression-Model"> </a>
+</h1>
+<p>We instantiate our model using the <code>LogisticRegression()</code> class from scikit-learn and train it on our dataset using the <code>fit</code> method.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>LogisticRegression()</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now that our model is trained, let's see how well it predicts Justice Brennan's voting record based on the training data.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.8191805225653207
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Not bad. Using voting data from prior to 1980 only, the model predicts Justice Brennan's voting record with approximately 82% accuracy.</p>
+<p>But, trained on this data, how well does the model predict Justice Brennan's voting from 1980 onwards?</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.6015965166908563
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The model achieves approximately 60% accuracy. This is better than a coin toss, but not as good as the other algorithms I've reviewed on LitKM. Both KNN and the neural network achieved 69% accuracy.</p>
+<p>When working with KNN, it occurred to me that perhaps the dataset, as normalized per the approached detailed above, was incomplete. Specifically, the features and labels were not scaled to the same range. Whereas the labels use a range of 0 to 1, the features do not.</p>
+<p>Below I reproduce the code to scale the features to a range of 0 to 1, same as the labels, and fit a new logistic regression model to this updated dataset.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="c1">#Convert the features from numpy arrays to DataFrames in prep for min-max scaling, and ease of review</span>
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1">#Apply min-max scaling to the training features</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>    
+<span class="nb">max</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>    
+<span class="n">X_train</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_train</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">max</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span>
+
+<span class="c1">#Apply min-max scaling to the testing features</span>
+<span class="nb">min</span> <span class="o">=</span> <span class="n">X_test</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>    
+<span class="nb">max</span> <span class="o">=</span> <span class="n">X_test</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>   
+<span class="n">X_test</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_test</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">max</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span>
+
+<span class="c1">#Convert the labels to DataFrames from numpy arrays (because the features are now DataFrames)</span>
+<span class="n">Y_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Y_train</span><span class="p">)</span>
+<span class="n">Y_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Y_test</span><span class="p">)</span>
+
+<span class="c1">#Fit a new logistic regression model with the updated dataset</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>LogisticRegression()</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So, how does this new model perform?</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.8206650831353919
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>On the training data, the model performs slightly better.</p>
+<p>But check out the results on the testing data:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.5653120464441219
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Big drop! Almost 4%.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Final-Thoughts">
+<a class="anchor" href="#Final-Thoughts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Final Thoughts<a class="anchor-link" href="#Final-Thoughts"> </a>
+</h1>
+<p>With KNN, normalizing the features to likewise use a range of 0 to 1 boosted performance by about 1%. But, for logistic regression, this same change decreased perforance, and by a relatively significant amount. Candidly, at this point I have no idea why this occurred. Any ideas? I'm all ears!</p>
+<p></p>
+<div class="footnotes"><p id="fn-1">1. See <a href="https://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/law/general/2021/02/11/AI_and_SCOTUS_Judging.html">Using Artificial Intelligence to Predict SCOTUS Judging</a>; <a href="https://www.litkm.com/artificial%20intelligence/machine%20learning/deep%20learning/litigation/analytics/python/keras/neural%20networks/2021/02/26/Parsing_Model.html">Parsing a Neural Network to Predict SCOTUS Judging</a>; and <a href="https://www.litkm.com/python/artificial%20intelligence/machine%20learning/scikit-learn/knn/k-nearest%20neighbor/law/litigation/analytics/2021/11/10/Python_KNN_to_Predict_SCOTUS_Voting.html">Using K-Nearest Neighbor to Predict SCOTUS Judging</a>.<a href="#fnref-1" class="footnote footnotes">↩</a></p></div>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="litkm/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/python/artificial%20intelligence/machine%20learning/scikit-learn/logistic%20regression/law/litigation/analytics/2022/02/07/Logistic_Regression_&_SCOTUS_v3.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Learning to apply machine learning to litigation.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/litkm" target="_blank" title="litkm"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/LitigationKM" target="_blank" title="LitigationKM"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
