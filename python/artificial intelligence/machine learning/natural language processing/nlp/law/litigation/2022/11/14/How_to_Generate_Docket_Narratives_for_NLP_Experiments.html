@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>How to Generate Docket Narratives for NLP Experiments | The LitKM Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="How to Generate Docket Narratives for NLP Experiments" />
+<meta name="author" content="Charles Dobson" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Do you have a better approach to creating a synthetic dataset for this?" />
+<meta property="og:description" content="Do you have a better approach to creating a synthetic dataset for this?" />
+<link rel="canonical" href="http://www.litkm.com/python/artificial%20intelligence/machine%20learning/natural%20language%20processing/nlp/law/litigation/2022/11/14/How_to_Generate_Docket_Narratives_for_NLP_Experiments.html" />
+<meta property="og:url" content="http://www.litkm.com/python/artificial%20intelligence/machine%20learning/natural%20language%20processing/nlp/law/litigation/2022/11/14/How_to_Generate_Docket_Narratives_for_NLP_Experiments.html" />
+<meta property="og:site_name" content="The LitKM Blog" />
+<meta property="og:image" content="http://www.litkm.com/images/social_logo.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-11-14T00:00:00-06:00" />
+<script type="application/ld+json">
+{"url":"http://www.litkm.com/python/artificial%20intelligence/machine%20learning/natural%20language%20processing/nlp/law/litigation/2022/11/14/How_to_Generate_Docket_Narratives_for_NLP_Experiments.html","@type":"BlogPosting","headline":"How to Generate Docket Narratives for NLP Experiments","dateModified":"2022-11-14T00:00:00-06:00","datePublished":"2022-11-14T00:00:00-06:00","image":"http://www.litkm.com/images/social_logo.png","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.litkm.com/python/artificial%20intelligence/machine%20learning/natural%20language%20processing/nlp/law/litigation/2022/11/14/How_to_Generate_Docket_Narratives_for_NLP_Experiments.html"},"author":{"@type":"Person","name":"Charles Dobson"},"description":"Do you have a better approach to creating a synthetic dataset for this?","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://www.litkm.com/feed.xml" title="The LitKM Blog" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-188329463-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">The LitKM Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How to Generate Docket Narratives for NLP Experiments</h1><p class="page-description">Do you have a better approach to creating a synthetic dataset for this?</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2022-11-14T00:00:00-06:00" itemprop="datePublished">
+        Nov 14, 2022
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Charles Dobson</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      3 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#artificial intelligence">artificial intelligence</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#machine learning">machine learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#natural language processing">natural language processing</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#nlp">nlp</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#law">law</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#litigation">litigation</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/litkm/blog/tree/master/_notebooks/2022-11-14-How_to_Generate_Docket_Narratives_for_NLP_Experiments.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/litkm/blog/master?filepath=_notebooks%2F2022-11-14-How_to_Generate_Docket_Narratives_for_NLP_Experiments.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/litkm/blog/blob/master/_notebooks/2022-11-14-How_to_Generate_Docket_Narratives_for_NLP_Experiments.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Introduction">Introduction </a></li>
+<li class="toc-entry toc-h1"><a href="#Generating-a-Synthetic-Dataset-of-Docket-Narratives">Generating a Synthetic Dataset of Docket Narratives </a></li>
+<li class="toc-entry toc-h1"><a href="#Final-Thoughts">Final Thoughts </a></li>
+<li class="toc-entry toc-h1"><a href="#Script">Script </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2022-11-14-How_to_Generate_Docket_Narratives_for_NLP_Experiments.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction">
+<a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
+</h1>
+<p>Lately I've been thinking about how natural language processing techniques could possibly be applied to the docket narratives lawyers draft for their timesheets. Categorizing dockets according to phase/task codes is an obvious possibility.</p>
+<p>But I also wonder about other potential insights; for example, to develop an understanding of the type of work associates and/or partners are doing, and the distribution of this work amongst timekeepers. Are associates being provided enough opportunities on their feet in court or conducting examinations? Are senior associates doing too much research that is better suited for junior associates? To what extent are partners doing "associate" work and vice versa?</p>
+<p>There is potentially a wealth of information in docket narratives that could be used to improve the operations of a litigation department. However, in most law firms, analyzing these narratives manually would not be practical. Hence my interest in applying NLP techniques to this type of data.</p>
+<h1 id="Generating-a-Synthetic-Dataset-of-Docket-Narratives">
+<a class="anchor" href="#Generating-a-Synthetic-Dataset-of-Docket-Narratives" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generating a Synthetic Dataset of Docket Narratives<a class="anchor-link" href="#Generating-a-Synthetic-Dataset-of-Docket-Narratives"> </a>
+</h1>
+<p>Of course, dockets are confidential. For my experiments I need to develop a synthetic dataset.</p>
+<p>Below is a script I wrote to generate a synthetic dataset of docket narratives. It's very simple and, admittedly, only roughly approximates genuine docket narratives. I'm hoping it will be a sufficient place to start.</p>
+<p>My first goal will simply be to see if I can train a language model to distinguish between narratives that involve drafting and those that do not. I plan try a range of supervised learning techniques, approaching this as a categorization problem.</p>
+<p>This script generates a dataset with two columns of information. The rows in the first column contain the randomly generated docket narratives. The rows in the second column contain either a 0 or a 1. So-called drafting narratives are assigned a 1 and all other narratives are assigned a 0. These will be the labels required to train the language model.</p>
+<h1 id="Final-Thoughts">
+<a class="anchor" href="#Final-Thoughts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Final Thoughts<a class="anchor-link" href="#Final-Thoughts"> </a>
+</h1>
+<p>Have you worked on this type of problem with similar data? Written anything on it? Is my dataset unsuited for this purpose? Please let me know!</p>
+<h1 id="Script">
+<a class="anchor" href="#Script" aria-hidden="true"><span class="octicon octicon-link"></span></a>Script<a class="anchor-link" href="#Script"> </a>
+</h1>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1">#Lists consisting of the components for the docket narratives</span>
+<span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"writing"</span><span class="p">,</span> <span class="s2">"drafting"</span><span class="p">,</span> <span class="s2">"editing"</span><span class="p">,</span> <span class="s2">"revising"</span><span class="p">,</span> <span class="s2">"briefing"</span><span class="p">,</span> <span class="s2">"reviewing"</span><span class="p">,</span> <span class="s2">"analyzing"</span><span class="p">,</span> <span class="s2">"preparing"</span><span class="p">,</span> <span class="s2">"proofing"</span><span class="p">,</span> <span class="s2">"researching"</span><span class="p">]</span>
+
+<span class="nb">object</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"notice of motion"</span><span class="p">,</span> <span class="s2">"affidavit"</span><span class="p">,</span> <span class="s2">"factum"</span><span class="p">,</span> <span class="s2">"memorandum"</span><span class="p">,</span> <span class="s2">"memo"</span><span class="p">,</span> <span class="s2">"compendium"</span><span class="p">,</span> <span class="s2">"book of authority"</span><span class="p">,</span> <span class="s2">"motion record"</span><span class="p">,</span> <span class="s2">"analysis"</span><span class="p">,</span> <span class="s2">"order"</span><span class="p">,</span> <span class="p">]</span>
+
+<span class="n">subject</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"summary judgment"</span><span class="p">,</span> <span class="s2">"injunction"</span><span class="p">,</span> <span class="s2">"enforcing foreign judgment"</span><span class="p">,</span> <span class="s2">"motion to strike"</span><span class="p">,</span> <span class="s2">"refusals"</span><span class="p">,</span> <span class="s2">"disqualifying expert"</span><span class="p">]</span>
+
+<span class="n">dockets</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1">#Function to randomly generate a docket narrative and add it to a list containing all of the narratives</span>
+<span class="k">def</span> <span class="nf">add_docket</span><span class="p">():</span>
+  <span class="n">docket</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" re: "</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span>
+  <span class="n">dockets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">docket</span><span class="p">)</span>
+
+<span class="c1">#While loop to generate the dataset. Edit the number to the right of the &lt; to specify the number of docket narratives you desire.</span>
+<span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">:</span>
+  <span class="n">add_docket</span><span class="p">()</span>
+  <span class="n">x</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c1">#Convert list with narratives to DataFrame</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dockets</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'narrative'</span><span class="p">])</span>
+
+<span class="c1">#List containing the drafting words</span>
+<span class="n">drafting</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"writing"</span><span class="p">,</span> <span class="s2">"drafting"</span><span class="p">,</span> <span class="s2">"editing"</span><span class="p">,</span> <span class="s2">"revising"</span><span class="p">,</span> <span class="s2">"briefing"</span><span class="p">]</span>
+
+<span class="c1">#Function to identify drafting narratives</span>
+<span class="k">def</span> <span class="nf">is_drafting</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>  
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">drafting</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">'narrative'</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+<span class="c1">#Lambda function to review each narrative and identify the drafting narratives</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">'drafting'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">is_drafting</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">#Put a 0 in the drafting column where there is no 1 and convert the column from float to integer</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">'drafting'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'drafting'</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">'drafting'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'drafting'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1">#Convert DataFrame to CSV file</span>
+<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">'dockets'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+  <div id="df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf">
+    <div class="colab-df-container">
+      <div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>narrative</th>
+      <th>drafting</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>analyzing notice of motion re: motion to strike</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>drafting memo re: summary judgment</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>writing notice of motion re: summary judgment</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>briefing motion record re: enforcing foreign j...</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>briefing affidavit re: motion to strike</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>drafting notice of motion re: summary judgment</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>editing memo re: refusals</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>reviewing analysis re: disqualifying expert</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>editing order re: disqualifying expert</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>researching order re: enforcing foreign judgment</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  &lt;svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
+       width="24px"&gt;
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  &lt;/svg&gt;
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 10000 entries, 0 to 9999
+Data columns (total 2 columns):
+ #   Column     Non-Null Count  Dtype 
+---  ------     --------------  ----- 
+ 0   narrative  10000 non-null  object
+ 1   drafting   10000 non-null  int64 
+dtypes: int64(1), object(1)
+memory usage: 156.4+ KB
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s1">'drafting'</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1    5026
+0    4974
+Name: drafting, dtype: int64</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="litkm/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/python/artificial%20intelligence/machine%20learning/natural%20language%20processing/nlp/law/litigation/2022/11/14/How_to_Generate_Docket_Narratives_for_NLP_Experiments.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Learning to apply machine learning to litigation.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/litkm" target="_blank" title="litkm"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/LitigationKM" target="_blank" title="LitigationKM"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
