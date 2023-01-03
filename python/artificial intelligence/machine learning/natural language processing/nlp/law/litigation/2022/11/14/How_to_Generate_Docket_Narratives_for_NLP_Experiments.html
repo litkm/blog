@@ -87,7 +87,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      3 min read
+      4 min read
     
 </span></p>
 
@@ -194,7 +194,7 @@ window.onload = wrap_img;
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="c1">#Lists consisting of the components for the docket narratives</span>
-<span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"writing"</span><span class="p">,</span> <span class="s2">"drafting"</span><span class="p">,</span> <span class="s2">"editing"</span><span class="p">,</span> <span class="s2">"revising"</span><span class="p">,</span> <span class="s2">"briefing"</span><span class="p">,</span> <span class="s2">"reviewing"</span><span class="p">,</span> <span class="s2">"analyzing"</span><span class="p">,</span> <span class="s2">"preparing"</span><span class="p">,</span> <span class="s2">"proofing"</span><span class="p">,</span> <span class="s2">"researching"</span><span class="p">]</span>
+<span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"writing"</span><span class="p">,</span> <span class="s2">"drafting"</span><span class="p">,</span> <span class="s2">"editing"</span><span class="p">,</span> <span class="s2">"revising"</span><span class="p">,</span> <span class="s2">"briefing"</span><span class="p">,</span> <span class="s2">"reviewing"</span><span class="p">,</span> <span class="s2">"analyzing"</span><span class="p">,</span> <span class="s2">"preparing"</span><span class="p">,</span> <span class="s2">"proofing"</span><span class="p">,</span> <span class="s2">"researching"</span><span class="p">,</span> <span class="s2">"attending to"</span><span class="p">,</span> <span class="s2">"finalizing"</span><span class="p">,</span> <span class="s2">"considering"</span><span class="p">,</span> <span class="s2">"discussing"</span><span class="p">,</span> <span class="s2">"addressing"</span><span class="p">]</span>
 
 <span class="nb">object</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"notice of motion"</span><span class="p">,</span> <span class="s2">"affidavit"</span><span class="p">,</span> <span class="s2">"factum"</span><span class="p">,</span> <span class="s2">"memorandum"</span><span class="p">,</span> <span class="s2">"memo"</span><span class="p">,</span> <span class="s2">"compendium"</span><span class="p">,</span> <span class="s2">"book of authority"</span><span class="p">,</span> <span class="s2">"motion record"</span><span class="p">,</span> <span class="s2">"analysis"</span><span class="p">,</span> <span class="s2">"order"</span><span class="p">,</span> <span class="p">]</span>
 
@@ -250,7 +250,7 @@ window.onload = wrap_img;
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<div class=" highlight hl-python"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -265,7 +265,7 @@ window.onload = wrap_img;
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
-  <div id="df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf">
+  <div id="df-00f395fa-ae1f-4f70-8b06-c8ba1a98ac82">
     <div class="colab-df-container">
       <div>
 <style scoped="">
@@ -292,58 +292,108 @@ window.onload = wrap_img;
   <tbody>
     <tr>
       <th>0</th>
-      <td>analyzing notice of motion re: motion to strike</td>
+      <td>considering memorandum re: injunction</td>
       <td>0</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>drafting memo re: summary judgment</td>
+      <td>editing notice of motion re: summary judgment</td>
       <td>1</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>writing notice of motion re: summary judgment</td>
-      <td>1</td>
+      <td>discussing memo re: injunction</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>briefing motion record re: enforcing foreign j...</td>
-      <td>1</td>
+      <td>proofing memorandum re: injunction</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>briefing affidavit re: motion to strike</td>
+      <td>writing motion record re: summary judgment</td>
       <td>1</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>drafting notice of motion re: summary judgment</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>editing memo re: refusals</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>reviewing analysis re: disqualifying expert</td>
+      <td>addressing factum re: summary judgment</td>
       <td>0</td>
     </tr>
     <tr>
-      <th>8</th>
-      <td>editing order re: disqualifying expert</td>
+      <th>6</th>
+      <td>addressing factum re: enforcing foreign judgment</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>drafting book of authority re: motion to strike</td>
       <td>1</td>
     </tr>
     <tr>
+      <th>8</th>
+      <td>attending to compendium re: motion to strike</td>
+      <td>0</td>
+    </tr>
+    <tr>
       <th>9</th>
-      <td>researching order re: enforcing foreign judgment</td>
+      <td>proofing memo re: summary judgment</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>addressing factum re: disqualifying expert</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>revising memo re: disqualifying expert</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>discussing analysis re: disqualifying expert</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>addressing notice of motion re: enforcing fore...</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>editing analysis re: injunction</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>considering affidavit re: disqualifying expert</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>discussing factum re: enforcing foreign judgment</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>addressing memorandum re: refusals</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>writing notice of motion re: enforcing foreign...</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>considering analysis re: refusals</td>
       <td>0</td>
     </tr>
   </tbody>
 </table>
 </div>
-      <button class="colab-df-convert" onclick="convertToInteractive('df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf')" title="Convert this dataframe to an interactive table." style="display:none;">
+      <button class="colab-df-convert" onclick="convertToInteractive('df-00f395fa-ae1f-4f70-8b06-c8ba1a98ac82')" title="Convert this dataframe to an interactive table." style="display:none;">
         
   &lt;svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
        width="24px"&gt;
@@ -392,12 +442,12 @@ window.onload = wrap_img;
 
       <script>
         const buttonEl =
-          document.querySelector('#df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf button.colab-df-convert');
+          document.querySelector('#df-00f395fa-ae1f-4f70-8b06-c8ba1a98ac82 button.colab-df-convert');
         buttonEl.style.display =
           google.colab.kernel.accessAllowed ? 'block' : 'none';
 
         async function convertToInteractive(key) {
-          const element = document.querySelector('#df-3ae1bbbb-4577-4a09-bf25-393ceca76ddf');
+          const element = document.querySelector('#df-00f395fa-ae1f-4f70-8b06-c8ba1a98ac82');
           const dataTable =
             await google.colab.kernel.invokeFunction('convertToInteractive',
                                                      [key], {});
@@ -488,8 +538,8 @@ memory usage: 156.4+ KB
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1    5026
-0    4974
+<pre>0    6618
+1    3382
 Name: drafting, dtype: int64</pre>
 </div>
 
